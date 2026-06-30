@@ -70,8 +70,8 @@ export default function Navbar() {
         </a>
 
         {(!user || user.role === 'customer') && (
-          <Link to="/cart" className={cls('/cart')}>
-            Cart {count > 0 && `(${count})`}
+          <Link to="/cart" className={cls('/cart')} title="Cart">
+            🛒 {count > 0 && `(${count})`}
           </Link>
         )}
 
@@ -170,7 +170,11 @@ export default function Navbar() {
               </div>
             )}
           </div>
-        ) : null}
+        ) : (
+          <Link to="/login" className={cls('/login')}>
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );
