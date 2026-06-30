@@ -71,6 +71,11 @@
                                 <td>The Admin shall be able to view a list of all registered users on the platform.</td>
                                 <td>Admin</td>
                             </tr>
+                            <tr>
+                                <td><strong>FR-1.8</strong></td>
+                                <td>A logged-in user shall be able to view and update their own profile (username, email, phone, address). Vendors can also update their shop name and description from the Profile page.</td>
+                                <td>All Roles</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -110,6 +115,11 @@
                             <tr>
                                 <td><strong>FR-2.5</strong></td>
                                 <td>The Admin shall be able to revoke an approved vendor's access.</td>
+                                <td>Admin</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-2.6</strong></td>
+                                <td>The Admin shall be able to manage customer accounts and view all users separately categorized by their role (Admins, Vendors, Customers).</td>
                                 <td>Admin</td>
                             </tr>
                         </tbody>
@@ -156,6 +166,21 @@
                             <tr>
                                 <td><strong>FR-3.6</strong></td>
                                 <td>The Admin shall be able to create and manage product categories (name and slug).</td>
+                                <td>Admin</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.7</strong></td>
+                                <td>Any user (including guests) shall be able to view a public Vendors/Stores listing page showing all approved vendor shops.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.8</strong></td>
+                                <td>An approved Vendor shall be able to upload one or more product images when creating or updating a product. Images are stored in the server filesystem and served via Django's media URL.</td>
+                                <td>Vendor (Approved)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.9</strong></td>
+                                <td>The Admin shall be able to view and manage all products listed on the platform via a dedicated Admin Products page.</td>
                                 <td>Admin</td>
                             </tr>
                         </tbody>
@@ -319,8 +344,13 @@
                             </tr>
                             <tr>
                                 <td><strong>FR-7.3</strong></td>
-                                <td>The Admin dashboard shall display total users, total vendors, total customers, total products, total orders, pending orders, and platform-wide revenue.</td>
+                                <td>The Admin dashboard shall display total users, total vendors, total customers, total products, total orders, pending orders, and platform-wide revenue from delivered orders.</td>
                                 <td>Admin</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-7.4</strong></td>
+                                <td>All dashboard statistics shall be fetched in real-time from the <code>/api/dashboard/stats/</code> API endpoint, which returns different data payloads based on the authenticated user's role.</td>
+                                <td>All Roles</td>
                             </tr>
                         </tbody>
                     </table>

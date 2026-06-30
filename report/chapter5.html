@@ -160,8 +160,8 @@
                             <tr>
                                 <td><code>/cart</code></td>
                                 <td><code>Cart.jsx</code></td>
-                                <td>Customer</td>
-                                <td>Protected (JWT)</td>
+                                <td>None</td>
+                                <td>Public</td>
                             </tr>
                             <tr>
                                 <td><code>/checkout</code></td>
@@ -172,8 +172,20 @@
                             <tr>
                                 <td><code>/orders</code></td>
                                 <td><code>Orders.jsx</code></td>
-                                <td>Customer</td>
+                                <td>Any Authenticated</td>
                                 <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/profile</code></td>
+                                <td><code>Profile.jsx</code></td>
+                                <td>Any Authenticated</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/vendors</code></td>
+                                <td><code>Vendors.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
                             </tr>
                             <tr>
                                 <td><code>/vendor</code></td>
@@ -208,6 +220,24 @@
                             <tr>
                                 <td><code>/admin/orders</code></td>
                                 <td><code>AdminOrders.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin/products</code></td>
+                                <td><code>AdminProducts.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin/users</code></td>
+                                <td><code>AdminUsers.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin/customers</code></td>
+                                <td><code>AdminCustomers.jsx</code></td>
                                 <td>Admin</td>
                                 <td>Protected (JWT)</td>
                             </tr>
@@ -293,6 +323,22 @@
                             <text x="10" y="170" class="erd-field-text">stock (PositiveIntegerField)</text>
                             <line x1="0" y1="177" x2="210" y2="177" stroke="#ede9fe" stroke-width="1"/>
                             <text x="10" y="196" class="erd-field-text">is_active (BooleanField)</text>
+                        </g>
+
+                        <!-- ===== TABLE: products_productimage (far right) ===== -->
+                        <g transform="translate(880, 60)">
+                            <rect x="0" y="0" width="165" height="28" rx="6" fill="#6d28d9"/>
+                            <text x="82" y="19" class="erd-table-header">products_productimage</text>
+                            <rect x="0" y="28" width="165" height="115" rx="0" fill="#f5f3ff" stroke="#6d28d9" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="165" y2="57" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-fk-text">🔗 product_id (→ Product)</text>
+                            <line x1="0" y1="81" x2="165" y2="81" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-field-text">image (ImageField)</text>
+                            <line x1="0" y1="105" x2="165" y2="105" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">is_primary (Boolean)</text>
+                            <line x1="0" y1="129" x2="165" y2="129" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">created_at (DateTimeField)</text>
                         </g>
 
                         <!-- ===== TABLE: products_category (center-right) ===== -->
@@ -409,38 +455,31 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
-                                <td><code>/api/auth/register/</code></td>
-                                <td>No (Public)</td>
-                                <td><code>{email, username, password, role}</code></td>
-                                <td>201 — User details</td>
-                            </tr>
-                            <tr>
-                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
-                                <td><code>/api/auth/login/</code></td>
-                                <td>No (Public)</td>
-                                <td><code>{email, password}</code></td>
-                                <td>200 — JWT token pair</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PATCH</span></td>
+                                <td><code>/api/auth/me/</code></td>
+                                <td>Yes (Any role)</td>
+                                <td><code>{username, phone, address, shop_name?}</code></td>
+                                <td>200 — Updated profile</td>
                             </tr>
                             <tr>
                                 <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
-                                <td><code>/api/auth/me/</code></td>
-                                <td>Yes (Any role)</td>
+                                <td><code>/api/vendors/</code></td>
+                                <td>No (Public)</td>
                                 <td>None</td>
-                                <td>200 — Profile details</td>
+                                <td>200 — Approved vendor list</td>
                             </tr>
                             <tr>
                                 <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
                                 <td><code>/api/products/</code></td>
                                 <td>No (Public)</td>
-                                <td>Optional query params</td>
+                                <td>Optional query params: <code>?search=&amp;category=&amp;vendor=</code></td>
                                 <td>200 — Product list</td>
                             </tr>
                             <tr>
                                 <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
                                 <td><code>/api/products/</code></td>
                                 <td>Yes (Vendor)</td>
-                                <td><code>{name, price, stock, category_id}</code></td>
+                                <td><code>{name, price, stock, category_id, images[]}</code></td>
                                 <td>201 — Created product</td>
                             </tr>
                             <tr>
@@ -461,7 +500,7 @@
                                 <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
                                 <td><code>/api/orders/</code></td>
                                 <td>Yes (Customer)</td>
-                                <td><code>{items: [{product, qty}], address}</code></td>
+                                <td><code>{items: [{product_id, quantity}], address}</code></td>
                                 <td>201 — Order receipt</td>
                             </tr>
                             <tr>
@@ -469,21 +508,35 @@
                                 <td><code>/api/orders/</code></td>
                                 <td>Yes (Role-based)</td>
                                 <td>None</td>
-                                <td>200 — Filtered orders</td>
+                                <td>200 — Filtered orders by role</td>
                             </tr>
                             <tr>
                                 <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PATCH</span></td>
-                                <td><code>/api/orders/{id}/</code></td>
-                                <td>Yes (Vendor)</td>
+                                <td><code>/api/orders/{id}/update_status/</code></td>
+                                <td>Yes (Vendor / Admin)</td>
                                 <td><code>{status: "shipped"}</code></td>
                                 <td>200 — Updated status</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PATCH</span></td>
+                                <td><code>/api/vendors/{id}/approve/</code></td>
+                                <td>Yes (Admin)</td>
+                                <td>None</td>
+                                <td>200 — Vendor approved</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PATCH</span></td>
+                                <td><code>/api/vendors/{id}/reject/</code></td>
+                                <td>Yes (Admin)</td>
+                                <td>None</td>
+                                <td>200 — Vendor rejected</td>
                             </tr>
                             <tr>
                                 <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
                                 <td><code>/api/dashboard/stats/</code></td>
                                 <td>Yes (Role-based)</td>
                                 <td>None</td>
-                                <td>200 — Stats &amp; revenue</td>
+                                <td>200 — Role-specific stats &amp; revenue</td>
                             </tr>
                         </tbody>
                     </table>

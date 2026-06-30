@@ -160,6 +160,12 @@ api.interceptors.request.use((config) => {
                         </tbody>
                     </table>
                 </div>
+                <p>
+                    The chapter-by-chapter progression demonstrates a professional IS development methodology: from defining the problem statement in Chapter 1, to requirements capture (SRS, Chapter 3), system analysis with UML actors and use cases (Chapter 4), technical design with ERD and REST API contracts (Chapter 5), actual source code walkthroughs (Chapter 6), comprehensive testing evidence (Chapter 7), and finally conclusions with future enhancements (Chapter 8).
+                </p>
+                <p>
+                    Architecturally, the platform implements a fully decoupled 3-tier system: a React 18 SPA (Vite) handling 20 route-bound pages and components, communicating via Axios with automatic JWT header injection and silent refresh interception, to a Django REST Framework API split into five independent apps (<code>users</code>, <code>vendors</code>, <code>products</code>, <code>orders</code>, <code>dashboard</code>), backed by SQLite (development) and PostgreSQL-ready for production. Key implemented features include: role-based user registration (customer/vendor/admin), vendor approval workflow, product management with image uploads (Pillow), a public Vendors/Stores browsing page, search and category filtering, client-side cart (CartContext), server-side order placement with stock deduction and price snapshots, order status lifecycle management (Pending → Shipped → Delivered), profile management for all roles, and three distinct role-specific dashboards backed by a single dynamic stats API endpoint. This implementation, supported by six code samples, demonstrates a production-ready approach to scalable e-commerce development.
+                </p>
             </section>
 
             <div class="page-controls">

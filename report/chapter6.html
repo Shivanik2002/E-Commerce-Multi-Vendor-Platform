@@ -15,7 +15,7 @@
             </div>
 
             <p>
-                This chapter showcases the core code components of the E-Commerce Multi-Vendor Platform. The system is split between a Python/Django REST Framework backend and a JavaScript/React frontend. Four critical code components are documented below: authentication data models, views, API communication clients, and global state providers.
+                This chapter showcases the core code components of the E-Commerce Multi-Vendor Platform. The system is split between a Python/Django REST Framework backend (organized into 5 apps: <code>users</code>, <code>vendors</code>, <code>products</code>, <code>orders</code>, <code>dashboard</code>) and a JavaScript/React frontend (organized into <code>pages</code>, <code>components</code>, <code>context</code>, and <code>services</code>). Six critical code components are documented below.
             </p>
 
             <section id="code-sample-1">
@@ -214,10 +214,108 @@ api.interceptors.response.use(
                 </div>
             </section>
 
-            <section id="code-integration">
-                <h2>6.5 Code Integration Flow Diagram</h2>
+            <section id="code-sample-5">
+                <h2>6.5 Django Order Checkout Serializer (with Stock Deduction)</h2>
                 <p>
-                    The following sequence diagram details how the four core code blocks integrate to process a client request — starting from user authentication to verifying custom backend permissions.
+                    Located in <code>backend/orders/serializers.py</code>, the <code>OrderCreateSerializer.create()</code> method is the heart of the checkout flow. It processes cart items sent from the React frontend, calculates the total, saves the Order header row, creates individual OrderItem rows with a frozen price snapshot, and decrements product stock — all in a single database operation.
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/orders/serializers.py</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">class</span> <span class="token-function">OrderCreateSerializer</span>(serializers.Serializer):
+    items   = OrderItemCreateSerializer(many=True)
+    address = serializers.CharField()
+
+    <span class="token-keyword">def</span> <span class="token-function">create</span>(self, validated_data):
+        customer   = self.context[<span class="token-string">'request'</span>].user
+        items_data = validated_data.pop(<span class="token-string">'items'</span>)
+        total      = 0
+        item_objects = []
+
+        <span class="token-keyword">for</span> item <span class="token-keyword">in</span> items_data:
+            product  = Product.objects.get(id=item[<span class="token-string">'product_id'</span>])
+            subtotal = product.price * item[<span class="token-string">'quantity'</span>]
+            total   += subtotal
+            item_objects.append({
+                <span class="token-string">'product'</span>:  product,
+                <span class="token-string">'quantity'</span>: item[<span class="token-string">'quantity'</span>],
+                <span class="token-string">'price'</span>:    product.price  <span class="token-comment"># Freeze price at order time</span>
+            })
+
+        order = Order.objects.create(
+            customer=customer,
+            total_amount=total,
+            address=validated_data[<span class="token-string">'address'</span>]
+        )
+
+        <span class="token-keyword">for</span> i <span class="token-keyword">in</span> item_objects:
+            OrderItem.objects.create(order=order, **i)
+            i[<span class="token-string">'product'</span>].stock -= i[<span class="token-string">'quantity'</span>]  <span class="token-comment"># Deduct stock</span>
+            i[<span class="token-string">'product'</span>].save()
+
+        <span class="token-keyword">return</span> order</code></pre>
+                </div>
+            </section>
+
+            <section id="code-sample-6">
+                <h2>6.6 React AuthContext Provider</h2>
+                <p>
+                    Located in <code>frontend/src/context/AuthContext.jsx</code>, this Context provider persists authentication state across all components. On mount, it checks <code>localStorage</code> for a JWT token and silently restores session. The <code>login()</code> function stores tokens and fetches user profile in one flow; <code>logout()</code> clears tokens and wipes state.
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">frontend/src/context/AuthContext.jsx</div>
+                        <div class="code-lang">JavaScript</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">export function</span> <span class="token-function">AuthProvider</span>({ children }) {
+  <span class="token-keyword">const</span> [user, setUser]       = useState(null);
+  <span class="token-keyword">const</span> [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    <span class="token-keyword">const</span> token = localStorage.getItem(<span class="token-string">'access'</span>);
+    <span class="token-keyword">if</span> (token) {
+      api.get(<span class="token-string">'/auth/me/'</span>)
+        .then(res =&gt; setUser(res.data))
+        .catch(() =&gt; {
+          localStorage.removeItem(<span class="token-string">'access'</span>);
+          localStorage.removeItem(<span class="token-string">'refresh'</span>);
+        })
+        .finally(() =&gt; setLoading(false));
+    } <span class="token-keyword">else</span> { setLoading(false); }
+  }, []);
+
+  <span class="token-keyword">const</span> login = async (email, password) =&gt; {
+    <span class="token-keyword">const</span> res = await api.post(<span class="token-string">'/auth/login/'</span>, { email, password });
+    localStorage.setItem(<span class="token-string">'access'</span>,  res.data.access);
+    localStorage.setItem(<span class="token-string">'refresh'</span>, res.data.refresh);
+    <span class="token-keyword">const</span> me = await api.get(<span class="token-string">'/auth/me/'</span>);
+    setUser(me.data);
+    <span class="token-keyword">return</span> me.data;
+  };
+
+  <span class="token-keyword">const</span> logout = () =&gt; {
+    localStorage.removeItem(<span class="token-string">'access'</span>);
+    localStorage.removeItem(<span class="token-string">'refresh'</span>);
+    setUser(null);
+  };
+
+  <span class="token-keyword">return</span> (
+    &lt;<span class="token-keyword">AuthContext.Provider</span> value={{ user, login, logout, loading, setUser }}&gt;
+      {children}
+    &lt;/<span class="token-keyword">AuthContext.Provider</span>&gt;
+  );
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="code-integration">
+                <h2>6.7 Code Integration Flow Diagram</h2>
+                <p>
+                    The following sequence diagram details how the six core code components integrate to process a client request — starting from user authentication to verifying custom backend permissions and executing order checkout.
                 </p>
 
                 <div class="diagram-container">

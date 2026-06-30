@@ -28,9 +28,10 @@
                 <div class="callout callout-warning">
                     <strong>Scope &amp; Limitations of the Initial Release:</strong>
                     <ul>
-                        <li><strong>Simulated Payments:</strong> Payment operations are mock-only (Cash on Delivery / simulated checkout), without a live gateway hookup.</li>
-                        <li><strong>Standard Image Assets:</strong> Products display emoji icons or default URLs as static product icons.</li>
-                        <li><strong>Small-Scale Deployment:</strong> The infrastructure is optimized for local or lightweight server hosting.</li>
+                        <li><strong>Simulated Payments:</strong> Payment operations are mock-only (Cash on Delivery / simulated checkout), without a live payment gateway such as Razorpay or Stripe.</li>
+                        <li><strong>Local Media Storage:</strong> Product images are uploaded and served from the local filesystem (<code>backend/media/products/</code>) via Django's <code>MEDIA_ROOT</code> and Pillow. Cloud-based CDN storage (e.g., AWS S3) is reserved for production deployment.</li>
+                        <li><strong>Client-Side Cart:</strong> The shopping cart is maintained exclusively in React Context API memory and is cleared on browser refresh or logout. Server-side persistent cart is a future enhancement.</li>
+                        <li><strong>Small-Scale Deployment:</strong> The infrastructure uses SQLite for development storage. PostgreSQL migration is supported via a single <code>settings.py</code> config change.</li>
                     </ul>
                 </div>
             </section>
@@ -44,10 +45,10 @@
                     This project presents the design and development of a full-stack E-Commerce Multi-Vendor Platform built using <strong>Django REST Framework (DRF)</strong> as the backend API layer and <strong>React.js</strong> as the frontend single-page application (SPA). The platform implements a three-role user system: Admin, Vendor, and Customer — each with a dedicated dashboard and role-specific access controls enforced through JWT (JSON Web Token) authentication.
                 </p>
                 <p>
-                    Vendors can register on the platform, await admin approval, and then manage their product listings, track incoming customer orders, and monitor their sales performance through a vendor dashboard. Customers can browse all available products across vendors, filter by category, search by keyword, add items to a dynamic cart, and place orders with a delivery address. The Admin can approve or revoke vendor accounts, manage product categories, and view platform-wide statistics including total users, orders, and revenue.
+                    Vendors can register on the platform, await admin approval, and then manage their product listings (with image uploads supported via Pillow), track incoming customer orders, and monitor their sales performance through a vendor dashboard. Customers can browse all available products across vendors, filter by category, search by keyword, add items to a dynamic cart, and place orders with a delivery address. The Admin can approve or revoke vendor accounts, manage product categories, manage all users and orders, and view platform-wide statistics including total users, vendors, customers, products, orders, pending orders, and total revenue.
                 </p>
                 <p>
-                    The backend is developed using Django and Django REST Framework, with SQLite for development storage and full PostgreSQL compatibility for production. SimpleJWT handles secure token-based authentication with access and refresh token rotation. The frontend is built with React 18, using React Router v6 for client-side navigation, Axios for API communication with automatic JWT header injection and token refresh interceptors, and the Context API for global state management of authentication and shopping cart data.
+                    The backend is developed using Django and Django REST Framework, with SQLite for development storage and full PostgreSQL compatibility for production. SimpleJWT handles secure token-based authentication with a 60-minute access token lifetime and 7-day refresh token rotation. The frontend is built with React 18 (via Vite), using React Router v6 for client-side navigation across 20 distinct page components, Axios for API communication with automatic JWT header injection and silent token refresh interceptors, and the Context API for global state management of authentication state and shopping cart data.
                 </p>
                 <p>
                     The expected outcome is a fully functional multi-vendor marketplace demonstrating real-world information system development concepts including REST API design, role-based access control (RBAC), component-based UI architecture, relational database modeling, and end-to-end integration between a modern JavaScript frontend and a Python-based backend.

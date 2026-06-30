@@ -82,7 +82,7 @@
                             <tr>
                                 <td><strong>Admin</strong></td>
                                 <td>Human Actor</td>
-                                <td>Platform administrator who approves pending vendors, manages product categories, and monitors platform-wide statistics.</td>
+                                <td>Platform administrator who approves/rejects vendor accounts, manages product categories, views and manages all products, all orders, all users and customers, and monitors platform-wide statistics and revenue.</td>
                             </tr>
                             <tr>
                                 <td><strong>System</strong></td>
@@ -326,9 +326,18 @@
                                 <td><strong>UC-09: View Dashboard</strong></td>
                                 <td>
                                     <strong>Primary Actor:</strong> All Roles<br/>
-                                    <strong>Description:</strong> Displays role-specific statistics and summaries (orders, revenue, users, products).<br/>
+                                    <strong>Description:</strong> Displays role-specific statistics and summaries (orders, revenue, users, products) fetched from <code>/api/dashboard/stats/</code>.<br/>
                                     <strong>Precondition:</strong> User is authenticated.<br/>
                                     <strong>Postcondition:</strong> Dashboard statistics are fetched from API and rendered on screen.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-10: Manage Profile</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> All Roles<br/>
+                                    <strong>Description:</strong> Any authenticated user can view and update their profile (username, email, phone, address). Vendors additionally update their shop name and description via a PATCH to <code>/api/auth/me/</code>.<br/>
+                                    <strong>Precondition:</strong> User is authenticated.<br/>
+                                    <strong>Postcondition:</strong> Profile details updated in the database and reflected in the AuthContext state.
                                 </td>
                             </tr>
                         </tbody>
@@ -585,37 +594,43 @@
                                 <td><strong>User</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td>None</td>
-                                <td>Stores credentials, roles, and profile contacts.</td>
+                                <td>Stores credentials, roles (customer/vendor/admin), phone, and address. Email is the unique login identifier.</td>
                             </tr>
                             <tr>
                                 <td><strong>Vendor</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td><code>user_id</code> (OneToOne → User)</td>
-                                <td>Defines the vendor shop details and approval status.</td>
+                                <td>Defines the vendor shop (name, description) and approval status. Auto-created on User registration with role='vendor'.</td>
                             </tr>
                             <tr>
                                 <td><strong>Category</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td>None</td>
-                                <td>Represents groups for product classifications (slug-based).</td>
+                                <td>Represents product classification groups (name + unique slug). Managed by Admin only.</td>
                             </tr>
                             <tr>
                                 <td><strong>Product</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td><code>vendor_id</code>, <code>category_id</code></td>
-                                <td>Stores items listed by vendors with price and stock.</td>
+                                <td>Stores items listed by vendors with name, description, price, stock, and active status.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ProductImage</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td><code>product_id</code> (FK → Product)</td>
+                                <td>Stores one or more uploaded images per product. Each image has an <code>is_primary</code> flag and is served via Django's <code>MEDIA_URL</code>.</td>
                             </tr>
                             <tr>
                                 <td><strong>Order</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td><code>customer_id</code> (FK → User)</td>
-                                <td>Header record with order status, delivery address, and total.</td>
+                                <td>Header record with order status (pending/shipped/delivered/cancelled), delivery address, total amount, and creation timestamp.</td>
                             </tr>
                             <tr>
                                 <td><strong>OrderItem</strong></td>
                                 <td><code>id</code> (Auto)</td>
                                 <td><code>order_id</code>, <code>product_id</code></td>
-                                <td>Line-item snapshot of each product purchased at checkout price.</td>
+                                <td>Line-item snapshot of each product purchased at checkout price. Price is frozen at purchase time to preserve historical accuracy.</td>
                             </tr>
                         </tbody>
                     </table>

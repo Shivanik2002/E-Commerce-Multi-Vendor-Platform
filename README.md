@@ -6,7 +6,7 @@
 
 ## 🎓 Academic Submission Metadata
 * **Course:** Master of Computer Applications (MCA - Online)
-* **Semester:** Semester 4
+* **Semester:** Semester 3
 * **Laboratory Subject:** CAPOL510 – IS Development Laboratory
 * **Project Title:** Multi-Vendor E-Commerce Platform
 * **Submitted By:** Shivani Kushwah (Register No: `25113110500`)
