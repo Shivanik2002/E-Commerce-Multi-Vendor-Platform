@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Source Code &amp; Coding - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 6: Source Code &amp; Coding</h1>
+            </div>
+
+            <p>
+                This chapter showcases the core code components of the E-Commerce Multi-Vendor Platform. The system is split between a Python/Django REST Framework backend and a JavaScript/React frontend. Four critical code components are documented below: authentication data models, views, API communication clients, and global state providers.
+            </p>
+
+            <section id="code-sample-1">
+                <h2>6.1 Django Custom User Model</h2>
+                <p>
+                    Located in <code>backend/users/models.py</code>, this model overrides Django's default username-based authentication to use <strong>email</strong> as the primary identifier. It defines the three user roles (Customer, Vendor, Admin) that drive role-based access control (RBAC).
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/users/models.py</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">from</span> django.contrib.auth.models <span class="token-keyword">import</span> AbstractUser, BaseUserManager
+<span class="token-keyword">from</span> django.db <span class="token-keyword">import</span> models
+
+<span class="token-keyword">class</span> <span class="token-function">UserManager</span>(BaseUserManager):
+    <span class="token-keyword">def</span> <span class="token-function">create_user</span>(self, email, username, password=None, role='customer'):
+        <span class="token-keyword">if not</span> email:
+            <span class="token-keyword">raise</span> <span class="token-builtin">ValueError</span>(<span class="token-string">'Email is required'</span>)
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=username, role=role)
+        user.set_password(password)
+        user.save(using=self._db)
+        <span class="token-keyword">return</span> user
+
+    <span class="token-keyword">def</span> <span class="token-function">create_superuser</span>(self, email, username, password=None):
+        user = self.create_user(email, username, password, role='admin')
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        <span class="token-keyword">return</span> user
+
+<span class="token-keyword">class</span> <span class="token-function">User</span>(AbstractUser):
+    ROLE_CHOICES = (
+        (<span class="token-string">'customer'</span>, <span class="token-string">'Customer'</span>),
+        (<span class="token-string">'vendor'</span>, <span class="token-string">'Vendor'</span>),
+        (<span class="token-string">'admin'</span>, <span class="token-string">'Admin'</span>),
+    )
+    email    = models.EmailField(unique=True)
+    role     = models.CharField(max_length=20, choices=ROLE_CHOICES, default=<span class="token-string">'customer'</span>)
+    phone    = models.CharField(max_length=15, blank=True)
+    address  = models.TextField(blank=True)
+    objects  = UserManager()
+    
+    USERNAME_FIELD  = <span class="token-string">'email'</span>
+    REQUIRED_FIELDS = [<span class="token-string">'username'</span>]
+
+    <span class="token-keyword">def</span> <span class="token-function">__str__</span>(self):
+        <span class="token-keyword">return</span> <span class="token-string">f"{self.email} ({self.role})"</span></code></pre>
+                </div>
+            </section>
+
+            <section id="code-sample-2">
+                <h2>6.2 Django Product ViewSet with RBAC Permissions</h2>
+                <p>
+                    Located in <code>backend/products/views.py</code>, this viewset handles product CRUD operations and filters listings. It utilizes a custom permission class, <code>IsVendorOrReadOnly</code>, to enforce backend role-based access control.
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/products/views.py</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">from</span> rest_framework <span class="token-keyword">import</span> viewsets, permissions
+<span class="token-keyword">from</span> .models <span class="token-keyword">import</span> Product, Category, ProductImage
+<span class="token-keyword">from</span> .serializers <span class="token-keyword">import</span> ProductSerializer, CategorySerializer
+
+<span class="token-keyword">class</span> <span class="token-function">IsVendorOrReadOnly</span>(permissions.BasePermission):
+    <span class="token-keyword">def</span> <span class="token-function">has_permission</span>(self, request, view):
+        <span class="token-keyword">if</span> request.method <span class="token-keyword">in</span> permissions.SAFE_METHODS:
+            <span class="token-keyword">return True</span>
+        <span class="token-keyword">return</span> request.user.is_authenticated <span class="token-keyword">and</span> request.user.role == <span class="token-string">'vendor'</span>
+
+    <span class="token-keyword">def</span> <span class="token-function">has_object_permission</span>(self, request, view, obj):
+        <span class="token-keyword">if</span> request.method <span class="token-keyword">in</span> permissions.SAFE_METHODS:
+            <span class="token-keyword">return True</span>
+        <span class="token-keyword">return</span> obj.vendor.user == request.user
+
+<span class="token-keyword">class</span> <span class="token-function">ProductViewSet</span>(viewsets.ModelViewSet):
+    serializer_class   = ProductSerializer
+    permission_classes = [IsVendorOrReadOnly]
+
+    <span class="token-keyword">def</span> <span class="token-function">get_queryset</span>(self):
+        qs       = Product.objects.filter(is_active=True).order_by(<span class="token-string">'-created_at'</span>)
+        search   = self.request.query_params.get(<span class="token-string">'search'</span>)
+        category = self.request.query_params.get(<span class="token-string">'category'</span>)
+        vendor   = self.request.query_params.get(<span class="token-string">'vendor'</span>)
+        
+        <span class="token-keyword">if</span> search:   qs = qs.filter(name__icontains=search)
+        <span class="token-keyword">if</span> category: qs = qs.filter(category__slug=category)
+        <span class="token-keyword">if</span> vendor:   qs = qs.filter(vendor__id=vendor)
+        <span class="token-keyword">return</span> qs
+
+    <span class="token-keyword">def</span> <span class="token-function">perform_create</span>(self, serializer):
+        product = serializer.save(vendor=self.request.user.vendor_profile)
+        images = self.request.FILES.getlist(<span class="token-string">'images'</span>)
+        <span class="token-keyword">for</span> image <span class="token-keyword">in</span> images:
+            ProductImage.objects.create(product=product, image=image)</code></pre>
+                </div>
+            </section>
+
+            <section id="code-sample-3">
+                <h2>6.3 React Axios Interceptor Service</h2>
+                <p>
+                    Located in <code>frontend/src/services/api.js</code>, this service centralizes REST API requests. It automatically configures request headers with the active JWT access token, intercepts 401 Unauthorized responses to perform a silent refresh, and handles expired login sessions.
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">frontend/src/services/api.js</div>
+                        <div class="code-lang">JavaScript</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">import</span> axios <span class="token-keyword">from</span> <span class="token-string">'axios'</span>;
+
+<span class="token-keyword">const</span> api = axios.create({ baseURL: <span class="token-string">'http://localhost:8000/api'</span> });
+
+api.interceptors.request.use(config => {
+  <span class="token-keyword">const</span> token = localStorage.getItem(<span class="token-string">'access'</span>);
+  <span class="token-keyword">if</span> (token) config.headers.Authorization = <span class="token-string">`Bearer \${token}`</span>;
+  <span class="token-keyword">return</span> config;
+});
+
+api.interceptors.response.use(
+  res => res,
+  <span class="token-keyword">async</span> err => {
+    <span class="token-keyword">if</span> (err.response?.status === 401) {
+      <span class="token-keyword">const</span> refresh = localStorage.getItem(<span class="token-string">'refresh'</span>);
+      <span class="token-keyword">if</span> (refresh) {
+        <span class="token-keyword">try</span> {
+          <span class="token-keyword">const</span> r = <span class="token-keyword">await</span> axios.post(<span class="token-string">'http://localhost:8000/api/auth/refresh/'</span>, { refresh });
+          localStorage.setItem(<span class="token-string">'access'</span>, r.data.access);
+          err.config.headers.Authorization = <span class="token-string">`Bearer \${r.data.access}`</span>;
+          <span class="token-keyword">return</span> api(err.config);
+        } <span class="token-keyword">catch</span> {
+          localStorage.removeItem(<span class="token-string">'access'</span>);
+          localStorage.removeItem(<span class="token-string">'refresh'</span>);
+          window.location.href = <span class="token-string">'/login'</span>;
+        }
+      }
+    }
+    <span class="token-keyword">return</span> Promise.reject(err);
+  }
+);
+
+<span class="token-keyword">export default</span> api;</code></pre>
+                </div>
+            </section>
+
+            <section id="code-sample-4">
+                <h2>6.4 React Cart Context API</h2>
+                <p>
+                    Located in <code>frontend/src/context/CartContext.jsx</code>, this Context provider maintains customer shopping cart state globally. It exposes handlers to add items, modify quantities, and clear items after checkout.
+                </p>
+
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">frontend/src/context/CartContext.jsx</div>
+                        <div class="code-lang">JavaScript</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">import</span> { createContext, useContext, useState } <span class="token-keyword">from</span> <span class="token-string">'react'</span>;
+
+<span class="token-keyword">const</span> CartContext = createContext();
+
+<span class="token-keyword">export function</span> <span class="token-function">CartProvider</span>({ children }) {
+  <span class="token-keyword">const</span> [cart, setCart] = useState([]);
+
+  <span class="token-keyword">const</span> addToCart = (product) => {
+    setCart(prev => {
+      <span class="token-keyword">const</span> exists = prev.find(i => i.id === product.id);
+      <span class="token-keyword">if</span> (exists) <span class="token-keyword">return</span> prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
+      <span class="token-keyword">return</span> [...prev, { ...product, qty: 1 }];
+    });
+  };
+
+  <span class="token-keyword">const</span> removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
+
+  <span class="token-keyword">const</span> updateQty = (id, qty) => {
+    <span class="token-keyword">if</span> (qty < 1) <span class="token-keyword">return</span> removeFromCart(id);
+    setCart(prev => prev.map(i => i.id === id ? { ...i, qty } : i));
+  };
+
+  <span class="token-keyword">const</span> clearCart = () => setCart([]);
+
+  <span class="token-keyword">const</span> total = cart.reduce((s, i) => s + parseFloat(i.price) * i.qty, 0);
+  <span class="token-keyword">const</span> count = cart.reduce((s, i) => s + i.qty, 0);
+
+  <span class="token-keyword">return</span> (
+    &lt;<span class="token-keyword">CartContext.Provider</span> value={{ cart, addToCart, removeFromCart, updateQty, clearCart, total, count }}&gt;
+      {children}
+    &lt;/<span class="token-keyword">CartContext.Provider</span>&gt;
+  );
+}
+
+<span class="token-keyword">export function</span> <span class="token-function">useCart</span>() { <span class="token-keyword">return</span> useContext(CartContext); }</code></pre>
+                </div>
+            </section>
+
+            <section id="code-integration">
+                <h2>6.5 Code Integration Flow Diagram</h2>
+                <p>
+                    The following sequence diagram details how the four core code blocks integrate to process a client request — starting from user authentication to verifying custom backend permissions.
+                </p>
+
+                <div class="diagram-container">
+                    <svg viewBox="0 0 750 300" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Horizontal Lane labels -->
+                        <g transform="translate(100, 40)"><circle cx="0" cy="0" r="20" class="svg-node svg-node-primary"/><text class="svg-text" x="0" y="4" font-weight="bold">React</text></g>
+                        <g transform="translate(300, 40)"><circle cx="0" cy="0" r="20" class="svg-node"/><text class="svg-text" x="0" y="4" font-weight="bold">Axios</text></g>
+                        <g transform="translate(500, 40)"><circle cx="0" cy="0" r="20" class="svg-node svg-node-secondary"/><text class="svg-text" x="0" y="4" font-weight="bold">DRF</text></g>
+                        <g transform="translate(700, 40)"><circle cx="0" cy="0" r="20" class="svg-node"/><text class="svg-text" x="0" y="4" font-weight="bold">Models</text></g>
+
+                        <!-- Vertical timelines -->
+                        <line x1="100" y1="60" x2="100" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>
+                        <line x1="300" y1="60" x2="300" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>
+                        <line x1="500" y1="60" x2="500" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>
+                        <line x1="700" y1="60" x2="700" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>
+
+                        <!-- Step 1: Login -->
+                        <line x1="100" y1="100" x2="300" y2="100" stroke="var(--text-primary)" stroke-width="1.5"/>
+                        <polygon points="300,100 293,96 293,104" fill="var(--text-primary)"/>
+                        <text x="200" y="90" class="svg-text" font-size="10">1. login(email, pass)</text>
+
+                        <!-- Step 2: Request API -->
+                        <line x1="300" y1="120" x2="500" y2="120" stroke="var(--text-primary)" stroke-width="1.5"/>
+                        <polygon points="500,120 493,116 493,124" fill="var(--text-primary)"/>
+                        <text x="400" y="110" class="svg-text" font-size="10">2. POST /auth/login/</text>
+
+                        <!-- Step 3: DB Authenticate -->
+                        <line x1="500" y1="140" x2="700" y2="140" stroke="var(--text-primary)" stroke-width="1.5"/>
+                        <polygon points="700,140 693,136 693,144" fill="var(--text-primary)"/>
+                        <text x="600" y="130" class="svg-text" font-size="10">3. User.objects.get(email)</text>
+
+                        <!-- Step 4: JWT Return -->
+                        <line x1="700" y1="170" x2="300" y2="170" stroke="var(--text-muted)" stroke-width="1.2" stroke-dasharray="2 2"/>
+                        <polygon points="300,170 307,174 307,166" fill="var(--text-muted)"/>
+                        <text x="500" y="160" class="svg-text" font-size="10">4. Return access &amp; refresh tokens</text>
+
+                        <!-- Step 5: Save & Intercept -->
+                        <line x1="300" y1="200" x2="100" y2="200" stroke="var(--text-muted)" stroke-width="1.2" stroke-dasharray="2 2"/>
+                        <polygon points="100,200 107,204 107,196" fill="var(--text-muted)"/>
+                        <text x="200" y="195" class="svg-text" font-size="10">5. Set localStorage &amp; AuthState</text>
+
+                        <!-- Step 6: Create Product with Auth Header -->
+                        <line x1="100" y1="240" x2="500" y2="240" stroke="var(--text-primary)" stroke-width="1.5"/>
+                        <polygon points="500,240 493,236 493,244" fill="var(--text-primary)"/>
+                        <text x="300" y="230" class="svg-text" font-size="10">6. POST /products/ (Header: Bearer token)</text>
+
+                        <!-- Step 7: Permission Check -->
+                        <path d="M 500 240 Q 550 250 500 260" fill="none" stroke="var(--primary)" stroke-width="1.5"/>
+                        <polygon points="500,260 507,263 503,256" fill="var(--primary)"/>
+                        <text x="560" y="255" class="svg-text" font-size="9" fill="var(--primary)">IsVendorOrReadOnly</text>
+                    </svg>
+                    <div class="diagram-caption">Figure 6.1: Integration Sequence Flow from User Login to Token-Based API Requests</div>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter5.html" class="control-btn">&larr; Chapter 5</a>
+                <a href="chapter7.html" class="control-btn control-btn-next">Chapter 7: Testing &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 7 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -12,19 +12,23 @@ class DashboardStatsView(APIView):
     def get(self, request):
         user = request.user
         if user.role == 'vendor':
-            try:
-                vendor = user.vendor_profile
-                products = Product.objects.filter(vendor=vendor)
-                orders   = Order.objects.filter(items__product__vendor=vendor).distinct()
-                revenue  = orders.filter(status='delivered').aggregate(t=Sum('total_amount'))['t'] or 0
-                return Response({
-                    'products': products.count(),
-                    'orders':   orders.count(),
-                    'revenue':  revenue,
-                    'pending':  orders.filter(status='pending').count(),
-                })
-            except:
-                return Response({'products':0,'orders':0,'revenue':0,'pending':0})
+            from vendors.models import Vendor
+            vendor, created = Vendor.objects.get_or_create(
+                user=user,
+                defaults={
+                    'shop_name': f"{user.username}'s Shop",
+                    'description': f"Store owned by {user.username}"
+                }
+            )
+            products = Product.objects.filter(vendor=vendor)
+            orders   = Order.objects.filter(items__product__vendor=vendor).distinct()
+            revenue  = orders.filter(status='delivered').aggregate(t=Sum('total_amount'))['t'] or 0
+            return Response({
+                'products': products.count(),
+                'orders':   orders.count(),
+                'revenue':  revenue,
+                'pending':  orders.filter(status='pending').count(),
+            })
 
         if user.role == 'admin':
             revenue = Order.objects.filter(status='delivered').aggregate(t=Sum('total_amount'))['t'] or 0

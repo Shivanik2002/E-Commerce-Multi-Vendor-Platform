@@ -29,22 +29,22 @@ export default function AdminDashboard() {
           link: '/admin/users'
         },
         {
-          label: '🏪 Vendors',
+          label: '🏪 Active Vendors',
           value: stats.vendors || 0,
           link: '/admin/vendors'
         },
         {
-          label: '🛍️ Customers',
+          label: '🛍️ Customers Registered',
           value: stats.customers || 0,
           link: '/admin/customers'
         },
         {
-          label: '📦 Products',
+          label: '📦 Products Cataloged',
           value: stats.products || 0,
-          link: '/admin/vendors'
+          link: '/admin/products'
         },
         {
-          label: '🛒 Total Orders',
+          label: '🛒 Combined Orders',
           value: stats.orders || 0,
           link: '/admin/orders'
         },
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
           link: '/admin/orders'
         },
         {
-          label: '💰 Revenue',
+          label: '💰 Platform Revenue',
           value: `₹${parseFloat(
             stats.revenue || 0
           ).toLocaleString()}`,
@@ -66,21 +66,16 @@ export default function AdminDashboard() {
   return (
     <div className="container">
       <h1 className="page-title">
-        ⚙️ Admin Dashboard
+        ⚙️ Admin Panel
       </h1>
 
-      <p
-        className="text-muted"
-        style={{ marginBottom: 32 }}
-      >
-        System Overview & Management
+      <p className="text-muted" style={{ marginBottom: 32 }}>
+        System-wide statistics, audit tracking, vendor registrations, order pipelines, and database directories.
       </p>
 
       {loading ? (
         <div className="loading">
-          <div style={{ fontSize: '20px' }}>
-            ⏳ Loading dashboard data...
-          </div>
+          ⏳ Loading platform statistics...
         </div>
       ) : stats ? (
         <>
@@ -89,23 +84,13 @@ export default function AdminDashboard() {
               <Link
                 key={item.label}
                 to={item.link}
-                style={{
-                  textDecoration: 'none',
-                  color: 'inherit'
-                }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <div
-                  className="stat-card"
-                  style={{
-                    cursor: 'pointer',
-                    height: '100%'
-                  }}
-                >
+                <div className="stat-card" style={{ height: '100%' }}>
                   <div className="stat-label">
                     {item.label}
                   </div>
-
-                  <div className="stat-value">
+                  <div className="stat-value" style={{ fontSize: '24px', marginTop: '12px' }}>
                     {item.value}
                   </div>
                 </div>
@@ -113,62 +98,44 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          <h2
-            className="section-title"
-            style={{ marginTop: 40 }}
-          >
-            Management Tools
+          <h2 className="section-title" style={{ marginTop: 48 }}>
+            ⚡ System Administration Controls
           </h2>
 
-          <div className="grid-2">
+          <div className="grid-2" style={{ marginBottom: '24px' }}>
             <div className="card">
-              <h3>🏪 Vendor Management</h3>
-
+              <h3>🏪 Vendor Registrations</h3>
               <p>
-                Approve or reject vendor
-                registrations, monitor vendor
-                activity, and manage vendor
-                accounts.
+                Monitor incoming seller registration requests, approve new shop requests, reject inactive vendors, and review store logs.
               </p>
-
               <Link
                 to="/admin/vendors"
                 className="btn btn-primary btn-sm"
-                style={{ marginTop: 16 }}
+                style={{ marginTop: 20 }}
               >
                 Manage Vendors →
               </Link>
             </div>
 
             <div className="card">
-              <h3>📋 Order Management</h3>
-
+              <h3>📋 Global Orders Ledger</h3>
               <p>
-                View and manage all customer
-                orders across all vendors,
-                track order status, and
-                handle issues.
+                Oversee and track checkout orders across all platform vendors, inspect details, update fulfillment statuses, and manage cancellations.
               </p>
-
               <Link
                 to="/admin/orders"
                 className="btn btn-primary btn-sm"
-                style={{ marginTop: 16 }}
+                style={{ marginTop: 20 }}
               >
-                View All Orders →
+                View Global Orders →
               </Link>
             </div>
           </div>
         </>
       ) : (
         <div className="empty">
-          <h3>
-            ⚠️ Unable to load dashboard
-          </h3>
-
-          <p>
-            Please try refreshing the page
-          </p>
+          <h3>⚠️ Unable to load database stats</h3>
+          <p>Please try refreshing the page or contact support if the issue persists.</p>
         </div>
       )}
     </div>

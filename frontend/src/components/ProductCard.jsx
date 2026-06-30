@@ -60,8 +60,7 @@ export default function ProductCard({ product }) {
           Stock: {product.stock}
         </p>
 
-        {user &&
-          user.role === 'customer' &&
+        {(!user || user.role === 'customer') &&
           product.stock > 0 && (
             <button
               className="btn btn-primary btn-sm"

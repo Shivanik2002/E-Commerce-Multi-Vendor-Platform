@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 
@@ -19,11 +19,20 @@ import AdminOrders     from './pages/AdminOrders';
 import AdminUsers from './pages/AdminUsers';
 import AdminCustomers from './pages/AdminCustomers';
 import AdminProducts from './pages/AdminProducts';
+import Profile from './pages/Profile';
+import Vendors from './pages/Vendors';
 
 function Protected({ children, role }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+
   if (loading) return <div className="loading">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  
+  if (!user) {
+    const path = location.pathname.substring(1) + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(path)}`} replace />;
+  }
+  
   if (role && user.role !== role) return <Navigate to="/" replace />;
   return children;
 }
@@ -36,12 +45,16 @@ export default function App() {
         {/* Public */}
         <Route path="/"              element={<Home />} />
         <Route path="/products"      element={<ProductList />} />
+        <Route path="/vendors"       element={<Vendors />} />
         <Route path="/products/:id"  element={<ProductDetail />} />
         <Route path="/login"         element={<Login />} />
         <Route path="/register"      element={<Register />} />
 
+        {/* Profile (all authenticated users) */}
+        <Route path="/profile"  element={<Protected><Profile /></Protected>} />
+
         {/* Customer */}
-        <Route path="/cart"     element={<Protected><Cart /></Protected>} />
+        <Route path="/cart"     element={<Cart />} />
         <Route path="/checkout" element={<Protected role="customer"><Checkout /></Protected>} />
         <Route path="/orders"   element={<Protected><Orders /></Protected>} />
 

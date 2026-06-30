@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Introduction - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 1: Introduction</h1>
+            </div>
+
+            <section id="problem-statement">
+                <h2>1.1 Problem Statement</h2>
+                <p>
+                    In today's digital economy, e-commerce has become a necessity rather than a luxury. However, a significant challenge exists for small and medium-sized vendors who wish to sell their products online. Building and maintaining a dedicated e-commerce website requires substantial investment in terms of money, time, and technical expertise — resources that most small vendors simply do not have access to.
+                </p>
+                <p>
+                    Existing large-scale marketplace platforms such as Amazon or Flipkart, while popular, charge high commission rates on every transaction, impose strict listing policies, and provide vendors with very limited control over their own brand identity and customer relationships. Independent vendors are left with no direct access to their customer data, no customization of their storefront, and heavy dependency on a third-party platform.
+                </p>
+                <p>
+                    This project addresses the above problem by proposing a custom-built <strong>E-Commerce Multi-Vendor Platform</strong> — a shared marketplace where multiple independent vendors can register, set up their own digital shop, list products, and manage orders through dedicated dashboards. Customers can browse products from all vendors in a single unified interface, add items to a cart, and place orders with ease. A platform administrator oversees vendor approvals, manages product categories, and monitors overall platform activity.
+                </p>
+                <div class="callout callout-warning">
+                    <strong>Scope &amp; Limitations of the Initial Release:</strong>
+                    <ul>
+                        <li><strong>Simulated Payments:</strong> Payment operations are mock-only (Cash on Delivery / simulated checkout), without a live gateway hookup.</li>
+                        <li><strong>Standard Image Assets:</strong> Products display emoji icons or default URLs as static product icons.</li>
+                        <li><strong>Small-Scale Deployment:</strong> The infrastructure is optimized for local or lightweight server hosting.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="abstract">
+                <h2>1.2 Abstract</h2>
+                <p>
+                    The rapid growth of online commerce has created a strong demand for multi-vendor marketplace platforms, where multiple independent sellers can operate under one unified digital storefront. However, affordable and customizable solutions for small-scale vendors remain scarce, pushing them toward expensive third-party platforms with limited flexibility.
+                </p>
+                <p>
+                    This project presents the design and development of a full-stack E-Commerce Multi-Vendor Platform built using <strong>Django REST Framework (DRF)</strong> as the backend API layer and <strong>React.js</strong> as the frontend single-page application (SPA). The platform implements a three-role user system: Admin, Vendor, and Customer — each with a dedicated dashboard and role-specific access controls enforced through JWT (JSON Web Token) authentication.
+                </p>
+                <p>
+                    Vendors can register on the platform, await admin approval, and then manage their product listings, track incoming customer orders, and monitor their sales performance through a vendor dashboard. Customers can browse all available products across vendors, filter by category, search by keyword, add items to a dynamic cart, and place orders with a delivery address. The Admin can approve or revoke vendor accounts, manage product categories, and view platform-wide statistics including total users, orders, and revenue.
+                </p>
+                <p>
+                    The backend is developed using Django and Django REST Framework, with SQLite for development storage and full PostgreSQL compatibility for production. SimpleJWT handles secure token-based authentication with access and refresh token rotation. The frontend is built with React 18, using React Router v6 for client-side navigation, Axios for API communication with automatic JWT header injection and token refresh interceptors, and the Context API for global state management of authentication and shopping cart data.
+                </p>
+                <p>
+                    The expected outcome is a fully functional multi-vendor marketplace demonstrating real-world information system development concepts including REST API design, role-based access control (RBAC), component-based UI architecture, relational database modeling, and end-to-end integration between a modern JavaScript frontend and a Python-based backend.
+                </p>
+                <p style="font-style: italic; font-weight: 500;">
+                    <strong>Keywords:</strong> Multi-Vendor E-Commerce, Django REST Framework, React.js, JWT Authentication, Role-Based Access Control, REST API, SQLite, Single-Page Application.
+                </p>
+            </section>
+
+            <div class="page-controls">
+                <a href="index.html" class="control-btn">&larr; Cover Page</a>
+                <a href="chapter2.html" class="control-btn control-btn-next">Chapter 2: Project Plan &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 2 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: Implementation - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 8: Implementation</h1>
+            </div>
+
+            <p>
+                This chapter describes the actual implementation of the E-Commerce Multi-Vendor Platform. It highlights the major technical problems encountered during full-stack system integration, the solutions applied to resolve them, and the engineering and professional lessons gained throughout the project.
+            </p>
+
+            <section id="problems-faced">
+                <h2>8.1 Problems Faced &amp; Solutions</h2>
+
+                <!-- Problem 1 -->
+                <div class="callout callout-warning">
+                    <h3>Problem 1: CORS Policy Blocking API Requests</h3>
+                    <p><strong>Phase:</strong> Frontend Development (Week 7)</p>
+                    <p><strong>Description:</strong> When the React frontend client (running on <code>localhost:5173</code>) sent HTTP requests to the Django backend (running on <code>localhost:8000</code>), they were blocked by the browser with a Cross-Origin Resource Sharing (CORS) warning. Browsers block scripts from making requests to a different domain, port, or protocol unless the target server explicitly sends permission headers.</p>
+                    <p><strong>Solution:</strong> Installed the <code>django-cors-headers</code> package, registered it in Django's middleware list, and configured the client domain. Order was critical — the CORS middleware must be listed before Django's standard common middleware.</p>
+                    <div class="code-wrapper">
+                        <pre class="code-body"><code><span class="token-comment"># backend/config/settings.py</span>
+INSTALLED_APPS = [
+    <span class="token-string">'corsheaders'</span>,
+    <span class="token-comment"># ... other apps</span>
+]
+
+MIDDLEWARE = [
+    <span class="token-string">'corsheaders.middleware.CorsMiddleware'</span>, <span class="token-comment"># First entry</span>
+    <span class="token-string">'django.middleware.common.CommonMiddleware'</span>,
+    <span class="token-comment"># ...</span>
+]
+
+CORS_ALLOWED_ORIGINS = [
+    <span class="token-string">"http://localhost:5173"</span>
+]</code></pre>
+                    </div>
+                </div>
+
+                <!-- Problem 2 -->
+                <div class="callout callout-warning">
+                    <h3>Problem 2: JWT Access Token Not Attached to API Requests</h3>
+                    <p><strong>Phase:</strong> Frontend Development (Week 7)</p>
+                    <p><strong>Description:</strong> After a successful login, the JWT access token was saved in <code>localStorage</code>. However, subsequent calls to protected endpoints (e.g., fetching order history) returned <code>401 Unauthorized</code> because the token was not attached to the request headers.</p>
+                    <p><strong>Solution:</strong> Implemented a request interceptor in the centralized Axios client file (<code>src/services/api.js</code>) to automatically copy the token from localStorage into the Authorization header before requests are sent.</p>
+                    <div class="code-wrapper">
+                        <pre class="code-body"><code><span class="token-comment">// frontend/src/services/api.js</span>
+api.interceptors.request.use((config) => {
+  <span class="token-keyword">const</span> token = localStorage.getItem(<span class="token-string">'access'</span>);
+  <span class="token-keyword">if</span> (token) {
+    config.headers.Authorization = <span class="token-string">`Bearer \${token}`</span>;
+  }
+  <span class="token-keyword">return</span> config;
+});</code></pre>
+                    </div>
+                </div>
+
+                <!-- Problem 3 -->
+                <div class="callout callout-warning">
+                    <h3>Problem 3: Vendor Profile Not Auto-Created on Registration</h3>
+                    <p><strong>Phase:</strong> Backend Development (Week 6)</p>
+                    <p><strong>Description:</strong> Registering as a vendor saved the User details. However, attempting to add products immediately raised a <code>RelatedObjectDoesNotExist: User has no vendor_profile</code> error because the related Vendor row was never initialized.</p>
+                    <p><strong>Solution:</strong> Added a Django <code>post_save</code> signal listener in <code>vendors/models.py</code> that automatically creates a Vendor profile row whenever a new User with role='vendor' is created.</p>
+                    <div class="code-wrapper">
+                        <pre class="code-body"><code><span class="token-comment"># backend/vendors/models.py</span>
+<span class="token-keyword">from</span> django.db.models.signals <span class="token-keyword">import</span> post_save
+<span class="token-keyword">from</span> django.dispatch <span class="token-keyword">import</span> receiver
+<span class="token-keyword">from</span> users.models <span class="token-keyword">import</span> User
+<span class="token-keyword">from</span> .models <span class="token-keyword">import</span> Vendor
+
+<span class="token-keyword">@receiver</span>(post_save, sender=User)
+<span class="token-keyword">def</span> <span class="token-function">create_vendor_profile</span>(sender, instance, created, **kwargs):
+    <span class="token-keyword">if</span> created <span class="token-keyword">and</span> instance.role == <span class="token-string">'vendor'</span>:
+        Vendor.objects.create(
+            user=instance,
+            shop_name=<span class="token-string">f"{instance.username}'s Shop"</span>,
+            is_approved=<span class="token-keyword">False</span>
+        )</code></pre>
+                    </div>
+                </div>
+
+                <!-- Problem 4 -->
+                <div class="callout callout-warning">
+                    <h3>Problem 4: OrderItem Price Stored as NULL (IntegrityError)</h3>
+                    <p><strong>Phase:</strong> Backend Development (Week 6)</p>
+                    <p><strong>Description:</strong> Submitting an order failed with an <code>IntegrityError: NOT NULL constraint failed: orders_orderitem.price</code>. The OrderItem table requires a price value to maintain historical invoices (so a vendor updating a product's price later does not corrupt old sales records), but the order serializer was not populating it.</p>
+                    <p><strong>Solution:</strong> Updated the serializer's <code>create()</code> override to fetch the live product price and save it as a snapshot in the OrderItem price field at creation time.</p>
+                    <div class="code-wrapper">
+                        <pre class="code-body"><code><span class="token-comment"># backend/orders/serializers.py</span>
+<span class="token-keyword">def</span> <span class="token-function">create</span>(self, validated_data):
+    items_data = validated_data.pop(<span class="token-string">'items'</span>)
+    order = Order.objects.create(**validated_data)
+    <span class="token-keyword">for</span> item_data <span class="token-keyword">in</span> items_data:
+        product = item_data[<span class="token-string">'product'</span>]
+        price = product.price <span class="token-comment"># Snapshot price</span>
+        OrderItem.objects.create(
+            order=order, product=product,
+            quantity=item_data[<span class="token-string">'quantity'</span>], price=price
+        )
+    <span class="token-keyword">return</span> order</code></pre>
+                    </div>
+                </div>
+
+                <!-- Problem 5 -->
+                <div class="callout callout-warning">
+                    <h3>Problem 5: Cart Total Showing NaN in the React Frontend</h3>
+                    <p><strong>Phase:</strong> Frontend Development (Week 8)</p>
+                    <p><strong>Description:</strong> The React cart page displayed the total price as <code>NaN</code> (Not a Number). The backend serializes decimal values as strings (e.g., "599.00") in JSON to prevent floating-point rounding errors. Trying to perform math operations on strings caused JavaScript to return NaN.</p>
+                    <p><strong>Solution:</strong> Wrapped all price value references with <code>parseFloat()</code> throughout the Cart Context and UI components before calculations are performed.</p>
+                    <div class="code-wrapper">
+                        <pre class="code-body"><code><span class="token-comment">// frontend/src/context/CartContext.jsx</span>
+<span class="token-keyword">const</span> total = cart.reduce(
+    (sum, item) => sum + parseFloat(item.price) * item.qty, 
+    0
+);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lessons-learnt">
+                <h2>8.2 Lessons Learnt</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Category</th>
+                                <th style="width: 70%;">Key Takeaways &amp; Engineering Insight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>REST API Conventions</strong></td>
+                                <td>Using ViewSets and Serializers in DRF ensures consistent response envelopes, simplifies data validation, and automates typical CRUD routing.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Stateless Authentication</strong></td>
+                                <td>JWT tokens allow secure, stateless REST communication. Silent refresh flows in Axios prevent session timeouts without disrupting user activities.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Global State Management</strong></td>
+                                <td>React Context API provides lightweight, global state storage for Cart and Auth states, avoiding heavy third-party libraries (e.g., Redux) for small-to-medium systems.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Relational snapshotting</strong></td>
+                                <td>Copying the product price directly into the OrderItem table at checkout is crucial for keeping historical order records accurate if the catalog changes.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>API Documentation</strong></td>
+                                <td>Auto-generating Swagger schemas using <code>drf-spectacular</code> makes full-stack development smoother by documenting endpoints in a central, interactive UI.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter7.html" class="control-btn">&larr; Chapter 7</a>
+                <a href="chapter9.html" class="control-btn control-btn-next">Chapter 9: Future Plans &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 9 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

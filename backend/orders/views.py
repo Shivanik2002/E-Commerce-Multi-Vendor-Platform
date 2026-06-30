@@ -15,7 +15,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Order.objects.all().order_by('-created_at')
 
         if user.role == 'vendor':
-            vendor = user.vendor_profile
+            from vendors.models import Vendor
+            vendor, created = Vendor.objects.get_or_create(
+                user=user,
+                defaults={
+                    'shop_name': f"{user.username}'s Shop",
+                    'description': f"Store owned by {user.username}"
+                }
+            )
 
             return Order.objects.filter(
                 items__product__vendor=vendor

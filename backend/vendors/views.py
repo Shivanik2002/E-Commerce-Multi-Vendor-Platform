@@ -4,14 +4,21 @@ from rest_framework.response import Response
 from .models import Vendor
 from .serializers import VendorSerializer
 
-class IsAdmin(permissions.BasePermission):
+class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
         return request.user.is_authenticated and request.user.role == 'admin'
 
 class VendorViewSet(viewsets.ModelViewSet):
-    queryset           = Vendor.objects.all().order_by('-created_at')
     serializer_class   = VendorSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.role == 'admin':
+            return Vendor.objects.all().order_by('-created_at')
+        return Vendor.objects.filter(is_approved=True).order_by('-created_at')
 
     @action(detail=True, methods=['patch'])
     def approve(self, request, pk=None):

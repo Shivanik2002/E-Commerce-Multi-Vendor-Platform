@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: System Testing - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 7: System Testing</h1>
+            </div>
+
+            <p>
+                Verification and Validation (V&amp;V) confirm that the software system matches its SRS specifications. Testing was executed at three levels: unit testing of models, integration testing of API endpoints, and validation testing of client workflows.
+            </p>
+
+            <section id="unit-testing">
+                <h2>7.1 Unit Testing</h2>
+                <p>
+                    Unit tests verify the correctness of isolated, small pieces of logic — primarily database constraints, model methods, and helper utilities.
+                </p>
+
+                <h3>Sample Django Model Unit Test Case</h3>
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/users/tests/test_models.py</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">from</span> django.test <span class="token-keyword">import</span> TestCase
+<span class="token-keyword">from</span> users.models <span class="token-keyword">import</span> User
+
+<span class="token-keyword">class</span> <span class="token-function">UserModelTest</span>(TestCase):
+    <span class="token-keyword">def</span> <span class="token-function">setUp</span>(self):
+        self.user = User.objects.create_user(
+            email=<span class="token-string">"vendor@test.com"</span>,
+            username=<span class="token-string">"testvendor"</span>,
+            password=<span class="token-string">"secret123"</span>,
+            role=<span class="token-string">"vendor"</span>
+        )
+
+    <span class="token-keyword">def</span> <span class="token-function">test_role_assignment</span>(self):
+        self.assertEqual(self.user.role, <span class="token-string">"vendor"</span>)
+        self.assertTrue(self.user.is_active)
+
+    <span class="token-keyword">def</span> <span class="token-function">test_password_hashing</span>(self):
+        self.assertTrue(self.user.check_password(<span class="token-string">"secret123"</span>))
+        self.assertNotEqual(self.user.password, <span class="token-string">"secret123"</span>) <span class="token-comment"># check hashing</span></code></pre>
+                </div>
+
+                <h3>Unit Test Execution Results</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Test ID</th>
+                                <th style="width: 25%;">Module Tested</th>
+                                <th style="width: 40%;">Verification Description</th>
+                                <th style="width: 20%;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>UT-01</strong></td>
+                                <td>User Model</td>
+                                <td>Verify role choice field accepts 'customer', 'vendor', and 'admin'.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-02</strong></td>
+                                <td>User Model</td>
+                                <td>Assert passwords are encrypted using PBKDF2 algorithm in database.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-03</strong></td>
+                                <td>User Model</td>
+                                <td>Assert unique constraint is enforced on the user email column.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-04</strong></td>
+                                <td>User Model</td>
+                                <td>Check string serialization returns email and role details.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-05</strong></td>
+                                <td>Vendor Model</td>
+                                <td>Verify that a new vendor has <code>is_approved=False</code> by default.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-06</strong></td>
+                                <td>Product Model</td>
+                                <td>Verify decimal precision values in product price field.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-07</strong></td>
+                                <td>Product Model</td>
+                                <td>Assert validation rule blocks negative integer stock listing.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-08</strong></td>
+                                <td>Order Model</td>
+                                <td>Confirm status default is set to 'pending' on instantiation.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UT-09</strong></td>
+                                <td>OrderItem Model</td>
+                                <td>Verify <code>get_subtotal()</code> returns correct quantity * price value.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">PASSED</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="integration-testing">
+                <h2>7.2 Integration Testing</h2>
+                <p>
+                    Integration tests verify the communication channels between subsystems — such as verifying endpoints retrieve correctly from tables and respect user access tokens.
+                </p>
+
+                <h3>Sample DRF API client integration test</h3>
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/products/tests/test_apis.py</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">from</span> rest_framework.test <span class="token-keyword">import</span> APITestCase
+<span class="token-keyword">from</span> rest_framework <span class="token-keyword">import</span> status
+
+<span class="token-keyword">class</span> <span class="token-function">ProductApiTest</span>(APITestCase):
+    <span class="token-keyword">def</span> <span class="token-function">test_public_product_listing</span>(self):
+        response = self.client.get(<span class="token-string">"/api/products/"</span>)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    <span class="token-keyword">def</span> <span class="token-function">test_customer_blocked_write</span>(self):
+        self.client.login(username=<span class="token-string">"cust@test.com"</span>, password=<span class="token-string">"123"</span>)
+        response = self.client.post(<span class="token-string">"/api/products/"</span>, {<span class="token-string">"name"</span>: <span class="token-string">"Pen"</span>, <span class="token-string">"price"</span>: 10})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED) <span class="token-comment"># requires JWT</span></code></pre>
+                </div>
+
+                <h3>Integration Scenarios</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Test ID</th>
+                                <th style="width: 25%;">Integration Scenario</th>
+                                <th style="width: 45%;">Endpoint &amp; Payload details</th>
+                                <th style="width: 15%;">Expected HTTP</th>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td><strong>IT-01</strong></td>
+                                <td>Public Listing</td>
+                                <td>GET request to <code>/api/products/</code> without active tokens.</td>
+                                <td><code>200 OK</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IT-02</strong></td>
+                                <td>Approved Vendor Post</td>
+                                <td>POST request to <code>/api/products/</code> with vendor token and name/price payload.</td>
+                                <td><code>201 Created</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IT-03</strong></td>
+                                <td>Customer Product Block</td>
+                                <td>POST request to <code>/api/products/</code> using token belonging to customer role.</td>
+                                <td><code>403 Forbidden</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IT-04</strong></td>
+                                <td>Unauthenticated Me Block</td>
+                                <td>GET request to <code>/api/auth/me/</code> without authorization headers.</td>
+                                <td><code>401 Unauthorized</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IT-05</strong></td>
+                                <td>Vendor Product Protection</td>
+                                <td>PUT request to <code>/api/products/{id}/</code> for item owned by a different vendor profile.</td>
+                                <td><code>403 Forbidden</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>IT-06</strong></td>
+                                <td>Admin Vendor Approval</td>
+                                <td>PATCH request to <code>/api/vendors/{id}/</code> toggle <code>is_approved</code> by Admin.</td>
+                                <td><code>200 OK</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="validation-testing">
+                <h2>7.3 Validation Testing (Postman Tests)</h2>
+                <p>
+                    Validation testing checks the software against final customer expectations. 16 distinct test suites were ran using Postman to assert API request shapes and validation error handling:
+                </p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th style="width: 25%;">Suite Name</th>
+                                <th style="width: 45%;">Postman Check Description</th>
+                                <th style="width: 20%;">Result</th>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td><strong>VAL-01</strong></td>
+                                <td>Register Validation</td>
+                                <td>Assert status 400 when registering with duplicate email string.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-02</strong></td>
+                                <td>Login Schema</td>
+                                <td>Check schema response has both "access" and "refresh" keys.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-03</strong></td>
+                                <td>Bad Login</td>
+                                <td>Check status 401 when sending wrong credentials.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-04</strong></td>
+                                <td>Token Expiry</td>
+                                <td>Send requests with expired access keys to assert server block.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-05</strong></td>
+                                <td>Token Rotate</td>
+                                <td>POST to <code>/api/auth/refresh/</code> with refresh token, check new access token returns.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-06</strong></td>
+                                <td>Customer Checkout</td>
+                                <td>POST order payload, assert item stock counts decrease.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-07</strong></td>
+                                <td>Over-Order Block</td>
+                                <td>POST order quantity higher than stock limit, assert 400 bad request.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-08</strong></td>
+                                <td>Order History</td>
+                                <td>GET <code>/api/orders/</code> as customer, check only customer's items return.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-09</strong></td>
+                                <td>Vendor Product CRUD</td>
+                                <td>Create, read, update, and delete products using approved vendor token.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-10</strong></td>
+                                <td>Unapproved Product Block</td>
+                                <td>Assert vendor account in pending state cannot save product rows.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-11</strong></td>
+                                <td>Category Manage</td>
+                                <td>Assert only Admins can create Category records.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-12</strong></td>
+                                <td>Search Keyword</td>
+                                <td>Query <code>/api/products/?search=iphone</code>, verify matching list returns.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-13</strong></td>
+                                <td>Filter Category</td>
+                                <td>Query <code>/api/products/?category=electronics</code>, check output filters.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-14</strong></td>
+                                <td>Vendor Dashboard Stats</td>
+                                <td>Query stats endpoint as Vendor, assert only vendor's totals are calculated.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-15</strong></td>
+                                <td>Admin Dash View</td>
+                                <td>Query stats as Admin, assert system-wide user and revenue sums are shown.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>VAL-16</strong></td>
+                                <td>Swagger Documentation</td>
+                                <td>GET <code>/api/docs/</code>, verify Swagger schema downloads successfully.</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">SUCCESS</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="debugging-log">
+                <h2>7.4 Debugging Log</h2>
+                <p>
+                    Below are five notable developer bugs resolved during final system integration.
+                </p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Bug / Symptom</th>
+                                <th style="width: 35%;">Root Cause</th>
+                                <th style="width: 40%;">Resolution Applied</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>CORS Policy Blocking API Requests</strong></td>
+                                <td>Browser blocked requests from <code>localhost:5173</code> to <code>localhost:8000</code> because of missing headers.</td>
+                                <td>Installed <code>django-cors-headers</code>, added CorsMiddleware first, and set <code>CORS_ALLOWED_ORIGINS</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Protected Endpoints return 401</strong></td>
+                                <td>JWT tokens were stored in local storage but never attached to outgoing Axios calls.</td>
+                                <td>Added a request interceptor in <code>src/services/api.js</code> to inject access token into Authorization header.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>RelatedObjectDoesNotExist on Product Save</strong></td>
+                                <td>A vendor profile record (holding shop name and approval status) was not created when a User registered with role='vendor'.</td>
+                                <td>Implemented a Django <code>post_save</code> signal in <code>vendors/models.py</code> to automatically initialize profiles.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>IntegrityError: price NOT NULL in OrderItem</strong></td>
+                                <td>Order serializer failed to write price at purchase time into OrderItem rows.</td>
+                                <td>Modified <code>create()</code> in <code>OrderSerializer</code> to extract the product price snapshot and write it to OrderItem rows.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cart Totals Showing NaN in Browser</strong></td>
+                                <td>Django decimal prices are serialized as strings in JSON. React JS was treating them as strings, causing arithmetic failures.</td>
+                                <td>Wrapped all cart calculations with <code>parseFloat()</code> in <code>CartContext.jsx</code> and product card elements.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="test-summary">
+                <h2>7.5 Test Summary Metrics</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Test Level</th>
+                                <th style="width: 40%;">Tests Configured</th>
+                                <th style="width: 30%;">Verification Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Unit Testing</strong></td>
+                                <td>Django Model Assertion cases</td>
+                                <td>9 Test Cases</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Integration Testing</strong></td>
+                                <td>Django REST Client requests</td>
+                                <td>6 Scenarios</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Validation Testing</strong></td>
+                                <td>Postman Client flow checks</td>
+                                <td>16 Scenarios</td>
+                            </tr>
+                            <tr style="font-weight: 700; background-color: rgba(var(--primary-rgb), 0.05);">
+                                <td>Total Checks Passed</td>
+                                <td>Stateless verification coverage</td>
+                                <td>31 test flows</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter6.html" class="control-btn">&larr; Chapter 6</a>
+                <a href="chapter8.html" class="control-btn control-btn-next">Chapter 8: Implementation &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 8 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

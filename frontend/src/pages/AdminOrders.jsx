@@ -12,6 +12,8 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const loadOrders = () => {
     setLoading(true);
@@ -56,6 +58,17 @@ export default function AdminOrders() {
     }
   };
 
+  const filteredOrders = orders.filter(o => {
+    const term = search.toLowerCase();
+    const matchesSearch = 
+      String(o.id).includes(term) ||
+      (o.customer_email || '').toLowerCase().includes(term) ||
+      (o.address || '').toLowerCase().includes(term) ||
+      (o.items || []).some(item => (item.product_name || '').toLowerCase().includes(term));
+    const matchesStatus = statusFilter === '' || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   if (loading) {
     return (
       <div className="loading container">
@@ -70,12 +83,35 @@ export default function AdminOrders() {
         Order Management
       </h1>
 
-      {orders.length === 0 ? (
+      <div className="flex-gap" style={{ marginBottom: '20px' }}>
+        <input
+          className="input"
+          placeholder="Search orders by ID, email, address, or product name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: '200px' }}
+        />
+        <select
+          className="input"
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          style={{ minWidth: '150px' }}
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {filteredOrders.length === 0 ? (
         <div className="empty">
           <h3>No Orders Found</h3>
+          <p>Try clearing search or filter query</p>
         </div>
       ) : (
-        orders.map((order) => (
+        filteredOrders.map((order) => (
           <div
             key={order.id}
             className="card"

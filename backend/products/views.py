@@ -28,9 +28,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        product = serializer.save(
-            vendor=self.request.user.vendor_profile
+        from vendors.models import Vendor
+        vendor, created = Vendor.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                'shop_name': f"{self.request.user.username}'s Shop",
+                'description': f"Store owned by {self.request.user.username}"
+            }
         )
+        product = serializer.save(vendor=vendor)
 
         images = self.request.FILES.getlist('images')
 

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4: System Analysis - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+    <style>
+        /* Diagram-specific overrides */
+        .diagram-container {
+            overflow-x: auto;
+            padding: 2rem 1.5rem;
+        }
+        .svg-diagram {
+            display: block;
+            margin: 0 auto;
+            min-width: 600px;
+        }
+        /* Actor stick figure */
+        .actor-head { fill: none; stroke: var(--text-primary); stroke-width: 2; }
+        .actor-body { stroke: var(--text-primary); stroke-width: 2; }
+        .actor-label { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        /* Use case ellipse */
+        .uc-ellipse { fill: rgba(0, 95, 107, 0.08); stroke: var(--primary); stroke-width: 2; }
+        .uc-text-line1 { font-family: 'Inter', sans-serif; font-size: 10.5px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .uc-text-line2 { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--text-secondary); text-anchor: middle; }
+        /* System boundary */
+        .sys-boundary { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 8 4; }
+        .sys-label { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--text-muted); text-anchor: middle; letter-spacing: 1.5px; }
+        /* Association lines */
+        .assoc-line { stroke: var(--text-muted); stroke-width: 1.5; fill: none; }
+        /* DFD Styles */
+        .dfd-process { fill: rgba(29, 78, 216, 0.08); stroke: #1d4ed8; stroke-width: 2; }
+        .dfd-process-text { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .dfd-entity { fill: var(--surface); stroke: var(--text-primary); stroke-width: 2; }
+        .dfd-entity-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .dfd-store-bg { fill: rgba(107, 33, 168, 0.08); }
+        .dfd-store-text { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; fill: var(--text-primary); text-anchor: start; }
+        .dfd-arrow { fill: var(--text-muted); }
+        .dfd-flow-line { stroke: var(--text-muted); stroke-width: 1.5; fill: none; }
+        .dfd-flow-text { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: var(--text-secondary); text-anchor: middle; }
+        .dfd-center { fill: rgba(21, 128, 61, 0.08); stroke: #15803d; stroke-width: 2.5; }
+        .dfd-center-text { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 800; fill: var(--text-primary); text-anchor: middle; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 4: System Analysis</h1>
+            </div>
+
+            <p>
+                System Analysis is the process of examining a business situation and identifying the key components, data flows, and interactions required to construct an information system. This chapter details the actors, use cases, data flow diagrams (DFD Level-0 and Level-1), database entity models, and system architecture.
+            </p>
+
+            <!-- 4.1 Actors Table -->
+            <section id="actors-table">
+                <h2>4.1 Actors Table</h2>
+                <p>An actor represents any entity (human user or external system) that interacts with the system to perform a function.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 18%;">Actor Name</th>
+                                <th style="width: 18%;">Type</th>
+                                <th style="width: 64%;">Description / Role in System</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Customer</strong></td>
+                                <td>Human Actor</td>
+                                <td>Browses products, manages the shopping cart, places orders, and views order history.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vendor</strong></td>
+                                <td>Human Actor</td>
+                                <td>Registers a shop, uploads and manages products, views and ships customer orders, and monitors shop analytics.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Admin</strong></td>
+                                <td>Human Actor</td>
+                                <td>Platform administrator who approves pending vendors, manages product categories, and monitors platform-wide statistics.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>System</strong></td>
+                                <td>Automated Actor</td>
+                                <td>Performs backend calculations, enforces JWT tokens, handles database transactions, and manages inventory levels automatically.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4.2 Use Case Diagram -->
+            <section id="use-case-diagram">
+                <h2>4.2 Use Case Diagram</h2>
+                <p>The Use Case diagram visualizes the relationships between actors and the system's core capabilities. The system boundary (dashed rectangle) encloses all platform processes.</p>
+
+                <div class="diagram-container">
+                    <svg viewBox="0 0 960 620" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+                        <!-- System Boundary -->
+                        <rect x="200" y="30" width="580" height="560" rx="12" class="sys-boundary"/>
+                        <text x="490" y="60" class="sys-label">SYSTEM BOUNDARY — E-COMMERCE MULTI-VENDOR PLATFORM</text>
+
+                        <!-- ===== ACTORS ===== -->
+                        <!-- Customer (left) -->
+                        <g transform="translate(100, 220)">
+                            <circle cx="0" cy="-26" r="18" class="actor-head"/>
+                            <line x1="0" y1="-8" x2="0" y2="30" class="actor-body"/>
+                            <line x1="-22" y1="8" x2="22" y2="8" class="actor-body"/>
+                            <line x1="0" y1="30" x2="-18" y2="58" class="actor-body"/>
+                            <line x1="0" y1="30" x2="18" y2="58" class="actor-body"/>
+                            <text x="0" y="82" class="actor-label">Customer</text>
+                        </g>
+
+                        <!-- Vendor (left-bottom) -->
+                        <g transform="translate(100, 440)">
+                            <circle cx="0" cy="-26" r="18" class="actor-head"/>
+                            <line x1="0" y1="-8" x2="0" y2="30" class="actor-body"/>
+                            <line x1="-22" y1="8" x2="22" y2="8" class="actor-body"/>
+                            <line x1="0" y1="30" x2="-18" y2="58" class="actor-body"/>
+                            <line x1="0" y1="30" x2="18" y2="58" class="actor-body"/>
+                            <text x="0" y="82" class="actor-label">Vendor</text>
+                        </g>
+
+                        <!-- Admin (right) -->
+                        <g transform="translate(860, 320)">
+                            <circle cx="0" cy="-26" r="18" class="actor-head"/>
+                            <line x1="0" y1="-8" x2="0" y2="30" class="actor-body"/>
+                            <line x1="-22" y1="8" x2="22" y2="8" class="actor-body"/>
+                            <line x1="0" y1="30" x2="-18" y2="58" class="actor-body"/>
+                            <line x1="0" y1="30" x2="18" y2="58" class="actor-body"/>
+                            <text x="0" y="82" class="actor-label">Admin</text>
+                        </g>
+
+                        <!-- ===== USE CASES (Left column - Customer side) ===== -->
+                        <!-- UC-01: Register -->
+                        <g transform="translate(360, 100)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-01</text>
+                            <text x="0" y="10" class="uc-text-line2">Register</text>
+                        </g>
+
+                        <!-- UC-02: Login -->
+                        <g transform="translate(360, 190)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-02</text>
+                            <text x="0" y="10" class="uc-text-line2">Login / Logout</text>
+                        </g>
+
+                        <!-- UC-03: Browse & Search Products -->
+                        <g transform="translate(360, 290)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-03</text>
+                            <text x="0" y="10" class="uc-text-line2">Browse &amp; Search</text>
+                        </g>
+
+                        <!-- UC-04: Manage Cart -->
+                        <g transform="translate(360, 390)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-04</text>
+                            <text x="0" y="10" class="uc-text-line2">Manage Cart</text>
+                        </g>
+
+                        <!-- UC-05: Place Order -->
+                        <g transform="translate(360, 490)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-05</text>
+                            <text x="0" y="10" class="uc-text-line2">Place Order</text>
+                        </g>
+
+                        <!-- ===== USE CASES (Right column - Vendor/Admin side) ===== -->
+                        <!-- UC-06: Manage Products -->
+                        <g transform="translate(620, 180)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-06</text>
+                            <text x="0" y="10" class="uc-text-line2">Manage Products</text>
+                        </g>
+
+                        <!-- UC-07: Update Order Status -->
+                        <g transform="translate(620, 290)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-07</text>
+                            <text x="0" y="10" class="uc-text-line2">Update Order Status</text>
+                        </g>
+
+                        <!-- UC-08: Approve / Revoke Vendor -->
+                        <g transform="translate(620, 400)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-08</text>
+                            <text x="0" y="10" class="uc-text-line2">Approve / Revoke Vendor</text>
+                        </g>
+
+                        <!-- UC-09: View Dashboard -->
+                        <g transform="translate(620, 500)">
+                            <ellipse cx="0" cy="0" rx="90" ry="28" class="uc-ellipse"/>
+                            <text x="0" y="-6" class="uc-text-line1">UC-09</text>
+                            <text x="0" y="10" class="uc-text-line2">View Dashboard</text>
+                        </g>
+
+                        <!-- ===== ASSOCIATION LINES ===== -->
+                        <!-- Customer to UC-01 -->
+                        <line x1="118" y1="194" x2="270" y2="100" class="assoc-line"/>
+                        <!-- Customer to UC-02 -->
+                        <line x1="118" y1="210" x2="270" y2="190" class="assoc-line"/>
+                        <!-- Customer to UC-03 -->
+                        <line x1="118" y1="220" x2="270" y2="290" class="assoc-line"/>
+                        <!-- Customer to UC-04 -->
+                        <line x1="118" y1="226" x2="270" y2="390" class="assoc-line"/>
+                        <!-- Customer to UC-05 -->
+                        <line x1="118" y1="232" x2="270" y2="490" class="assoc-line"/>
+
+                        <!-- Vendor to UC-01 -->
+                        <line x1="118" y1="414" x2="270" y2="100" class="assoc-line"/>
+                        <!-- Vendor to UC-02 -->
+                        <line x1="118" y1="420" x2="270" y2="190" class="assoc-line"/>
+                        <!-- Vendor to UC-06 -->
+                        <line x1="118" y1="426" x2="530" y2="180" class="assoc-line"/>
+                        <!-- Vendor to UC-07 -->
+                        <line x1="118" y1="432" x2="530" y2="290" class="assoc-line"/>
+                        <!-- Vendor to UC-09 -->
+                        <line x1="118" y1="438" x2="530" y2="500" class="assoc-line"/>
+
+                        <!-- Admin to UC-08 -->
+                        <line x1="842" y1="294" x2="710" y2="400" class="assoc-line"/>
+                        <!-- Admin to UC-09 -->
+                        <line x1="842" y1="310" x2="710" y2="500" class="assoc-line"/>
+                        <!-- Admin to UC-02 -->
+                        <line x1="842" y1="286" x2="450" y2="190" class="assoc-line"/>
+
+                    </svg>
+                    <div class="diagram-caption">Figure 4.1 — Use Case Diagram: Customer, Vendor &amp; Admin Actors with 9 Platform Use Cases</div>
+                </div>
+            </section>
+
+            <!-- 4.3 Use Case Specifications -->
+            <section id="use-case-descriptions">
+                <h2>4.3 Use Case Specifications</h2>
+                <p>Below are the structured specifications for the core use cases of the platform.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 22%;">Use Case ID</th>
+                                <th style="width: 78%;">Detailed Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>UC-01: User Registration</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Customer / Vendor<br/>
+                                    <strong>Description:</strong> Allows a guest user to create an account by specifying username, email, password, and their specific role.<br/>
+                                    <strong>Precondition:</strong> User is not authenticated and has a unique email.<br/>
+                                    <strong>Postcondition:</strong> A new User record is created in the database (along with an empty, unapproved Vendor profile if role was vendor).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-02: User Login</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> All Roles (Customer, Vendor, Admin)<br/>
+                                    <strong>Description:</strong> Authenticates the user with email/password and returns a JWT token pair.<br/>
+                                    <strong>Precondition:</strong> Registered account exists.<br/>
+                                    <strong>Postcondition:</strong> Browser stores JWT access and refresh tokens; user redirected to their role-specific dashboard.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-03: Browse &amp; Search</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Customer / Guest<br/>
+                                    <strong>Description:</strong> Fetches all active products, allowing filter by category and search by keyword.<br/>
+                                    <strong>Precondition:</strong> None (Public access).<br/>
+                                    <strong>Postcondition:</strong> Dynamic list displays matched product cards with stock status.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-04: Manage Cart</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Customer<br/>
+                                    <strong>Description:</strong> Adds items to cart, updates quantities, and calculates rolling totals.<br/>
+                                    <strong>Precondition:</strong> Customer is logged in.<br/>
+                                    <strong>Postcondition:</strong> Cart state is updated in memory and local storage.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-05: Place Order</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Customer / System<br/>
+                                    <strong>Description:</strong> Submits cart contents, checks inventory, saves order rows, and deducts item stock in a single database transaction.<br/>
+                                    <strong>Precondition:</strong> Active cart containing items, valid delivery address, user logged in.<br/>
+                                    <strong>Postcondition:</strong> Order and OrderItem records created, cart cleared, product stock reduced.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-06: Manage Products</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Vendor (Approved)<br/>
+                                    <strong>Description:</strong> Adds, edits, and deletes products in their storefront catalog.<br/>
+                                    <strong>Precondition:</strong> Vendor is approved and authenticated.<br/>
+                                    <strong>Postcondition:</strong> Catalog changes are reflected in the database and public view.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-07: Update Order Status</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Vendor<br/>
+                                    <strong>Description:</strong> Adjusts order status (Pending &rarr; Shipped &rarr; Delivered) for items belonging to their shop.<br/>
+                                    <strong>Precondition:</strong> Order containing vendor's products has been placed.<br/>
+                                    <strong>Postcondition:</strong> Order status updated in the database.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-08: Approve / Revoke Vendor</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> Admin<br/>
+                                    <strong>Description:</strong> Toggles the approval status for a vendor shop, enabling or blocking product uploads.<br/>
+                                    <strong>Precondition:</strong> Admin is logged in, targeted vendor account exists.<br/>
+                                    <strong>Postcondition:</strong> Vendor's <code>is_approved</code> boolean toggled in database.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UC-09: View Dashboard</strong></td>
+                                <td>
+                                    <strong>Primary Actor:</strong> All Roles<br/>
+                                    <strong>Description:</strong> Displays role-specific statistics and summaries (orders, revenue, users, products).<br/>
+                                    <strong>Precondition:</strong> User is authenticated.<br/>
+                                    <strong>Postcondition:</strong> Dashboard statistics are fetched from API and rendered on screen.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4.4 DFDs -->
+            <section id="dfd">
+                <h2>4.4 Data Flow Diagrams (DFDs)</h2>
+                <p>Data Flow Diagrams model the logical flow of data through processes, external entities, and data stores.</p>
+
+                <!-- DFD Level-0 -->
+                <h3>Level-0: Context Diagram</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 880 380" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+                        <!-- Center Process (Platform) -->
+                        <g transform="translate(440, 190)">
+                            <circle cx="0" cy="0" r="90" class="dfd-center"/>
+                            <text x="0" y="-22" class="dfd-center-text">0.0</text>
+                            <text x="0" y="2" class="dfd-center-text">E-COMMERCE</text>
+                            <text x="0" y="26" class="dfd-center-text">PLATFORM</text>
+                        </g>
+
+                        <!-- External Entity: Customer -->
+                        <g transform="translate(80, 190)">
+                            <rect x="-60" y="-30" width="120" height="60" rx="8" class="dfd-entity"/>
+                            <text x="0" y="-4" class="dfd-entity-text">Customer</text>
+                            <text x="0" y="15" class="dfd-flow-text">(End User)</text>
+                        </g>
+
+                        <!-- External Entity: Vendor -->
+                        <g transform="translate(440, 50)">
+                            <rect x="-60" y="-25" width="120" height="50" rx="8" class="dfd-entity"/>
+                            <text x="0" y="7" class="dfd-entity-text">Vendor</text>
+                        </g>
+
+                        <!-- External Entity: Admin -->
+                        <g transform="translate(800, 190)">
+                            <rect x="-60" y="-30" width="120" height="60" rx="8" class="dfd-entity"/>
+                            <text x="0" y="-4" class="dfd-entity-text">Admin</text>
+                            <text x="0" y="15" class="dfd-flow-text">(Platform Mgr)</text>
+                        </g>
+
+                        <!-- Flow: Customer → Platform (request) -->
+                        <line x1="140" y1="175" x2="350" y2="163" class="dfd-flow-line"/>
+                        <polygon points="350,163 342,158 342,168" class="dfd-arrow"/>
+                        <text x="245" y="155" class="dfd-flow-text">Login / Search / Place Order</text>
+
+                        <!-- Flow: Platform → Customer (response) -->
+                        <line x1="350" y1="215" x2="140" y2="205" class="dfd-flow-line"/>
+                        <polygon points="140,205 148,200 148,210" class="dfd-arrow"/>
+                        <text x="245" y="232" class="dfd-flow-text">JWT Token / Catalog / Order Receipt</text>
+
+                        <!-- Flow: Vendor → Platform (upward request) -->
+                        <line x1="405" y1="75" x2="380" y2="105" class="dfd-flow-line"/>
+                        <polygon points="380,105 376,97 384,100" class="dfd-arrow"/>
+                        <text x="325" y="95" class="dfd-flow-text">Manage Products</text>
+
+                        <!-- Flow: Platform → Vendor (downward response) -->
+                        <line x1="460" y1="105" x2="480" y2="75" class="dfd-flow-line"/>
+                        <polygon points="480,75 475,83 484,82" class="dfd-arrow"/>
+                        <text x="530" y="95" class="dfd-flow-text">Orders / Shop Stats</text>
+
+                        <!-- Flow: Admin → Platform (left request) -->
+                        <line x1="740" y1="175" x2="530" y2="163" class="dfd-flow-line"/>
+                        <polygon points="530,163 538,158 538,168" class="dfd-arrow"/>
+                        <text x="635" y="153" class="dfd-flow-text">Vendor Approvals / Category Mgmt</text>
+
+                        <!-- Flow: Platform → Admin (right response) -->
+                        <line x1="530" y1="215" x2="740" y2="205" class="dfd-flow-line"/>
+                        <polygon points="740,205 732,200 732,210" class="dfd-arrow"/>
+                        <text x="635" y="232" class="dfd-flow-text">Platform Analytics / All Users</text>
+
+                    </svg>
+                    <div class="diagram-caption">Figure 4.2 — DFD Level-0 Context Diagram: Platform as a Single System with External Actors</div>
+                </div>
+
+                <!-- DFD Level-1 -->
+                <h3>Level-1: Detailed Data Flow Diagram</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 1000 600" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+                        <!-- ===== EXTERNAL ENTITIES ===== -->
+                        <!-- Customer (top-left) -->
+                        <g transform="translate(85, 100)">
+                            <rect x="-65" y="-28" width="130" height="56" rx="8" class="dfd-entity"/>
+                            <text x="0" y="5" class="dfd-entity-text">Customer</text>
+                        </g>
+
+                        <!-- Vendor (bottom-left) -->
+                        <g transform="translate(85, 490)">
+                            <rect x="-65" y="-28" width="130" height="56" rx="8" class="dfd-entity"/>
+                            <text x="0" y="5" class="dfd-entity-text">Vendor</text>
+                        </g>
+
+                        <!-- Admin (right) -->
+                        <g transform="translate(900, 300)">
+                            <rect x="-65" y="-28" width="130" height="56" rx="8" class="dfd-entity"/>
+                            <text x="0" y="5" class="dfd-entity-text">Admin</text>
+                        </g>
+
+                        <!-- ===== PROCESSES ===== -->
+                        <!-- 1.0 Authentication -->
+                        <g transform="translate(290, 100)">
+                            <circle cx="0" cy="0" r="48" class="dfd-process"/>
+                            <text x="0" y="-8" class="dfd-process-text">1.0</text>
+                            <text x="0" y="8" class="dfd-process-text">Authentication</text>
+                        </g>
+
+                        <!-- 2.0 Product Catalog -->
+                        <g transform="translate(290, 290)">
+                            <circle cx="0" cy="0" r="48" class="dfd-process"/>
+                            <text x="0" y="-8" class="dfd-process-text">2.0 Product</text>
+                            <text x="0" y="8" class="dfd-process-text">Catalog</text>
+                        </g>
+
+                        <!-- 3.0 Cart & Checkout -->
+                        <g transform="translate(290, 490)">
+                            <circle cx="0" cy="0" r="48" class="dfd-process"/>
+                            <text x="0" y="-8" class="dfd-process-text">3.0 Cart &amp;</text>
+                            <text x="0" y="8" class="dfd-process-text">Checkout</text>
+                        </g>
+
+                        <!-- 4.0 Order Management -->
+                        <g transform="translate(600, 200)">
+                            <circle cx="0" cy="0" r="48" class="dfd-process"/>
+                            <text x="0" y="-8" class="dfd-process-text">4.0 Order</text>
+                            <text x="0" y="8" class="dfd-process-text">Management</text>
+                        </g>
+
+                        <!-- 5.0 Vendor Approval -->
+                        <g transform="translate(600, 400)">
+                            <circle cx="0" cy="0" r="48" class="dfd-process"/>
+                            <text x="0" y="-8" class="dfd-process-text">5.0 Vendor</text>
+                            <text x="0" y="8" class="dfd-process-text">Approval</text>
+                        </g>
+
+                        <!-- ===== DATA STORES ===== -->
+                        <!-- D1: Users DB -->
+                        <g transform="translate(460, 100)">
+                            <rect x="-65" y="-20" width="130" height="40" rx="0" class="dfd-store-bg" stroke="#6b21a8" stroke-width="2"/>
+                            <line x1="-65" y1="-20" x2="-65" y2="20" stroke="#6b21a8" stroke-width="3"/>
+                            <text x="-48" y="5" class="dfd-store-text">D1: Users</text>
+                        </g>
+
+                        <!-- D2: Products DB -->
+                        <g transform="translate(460, 290)">
+                            <rect x="-65" y="-20" width="130" height="40" rx="0" class="dfd-store-bg" stroke="#6b21a8" stroke-width="2"/>
+                            <line x1="-65" y1="-20" x2="-65" y2="20" stroke="#6b21a8" stroke-width="3"/>
+                            <text x="-48" y="5" class="dfd-store-text">D2: Products</text>
+                        </g>
+
+                        <!-- D3: Orders DB -->
+                        <g transform="translate(460, 490)">
+                            <rect x="-65" y="-20" width="130" height="40" rx="0" class="dfd-store-bg" stroke="#6b21a8" stroke-width="2"/>
+                            <line x1="-65" y1="-20" x2="-65" y2="20" stroke="#6b21a8" stroke-width="3"/>
+                            <text x="-48" y="5" class="dfd-store-text">D3: Orders</text>
+                        </g>
+
+                        <!-- ===== FLOW LINES ===== -->
+                        <!-- Customer → 1.0 Auth (credentials) -->
+                        <line x1="150" y1="100" x2="242" y2="100" class="dfd-flow-line"/>
+                        <polygon points="242,100 234,96 234,104" class="dfd-arrow"/>
+                        <text x="196" y="90" class="dfd-flow-text">Credentials</text>
+
+                        <!-- 1.0 Auth → D1 Users (save/check) -->
+                        <line x1="338" y1="100" x2="395" y2="100" class="dfd-flow-line"/>
+                        <polygon points="395,100 387,96 387,104" class="dfd-arrow"/>
+                        <text x="366" y="88" class="dfd-flow-text">Verify</text>
+
+                        <!-- D1 Users → 1.0 Auth (result) -->
+                        <line x1="395" y1="116" x2="338" y2="116" class="dfd-flow-line"/>
+                        <polygon points="338,116 346,120 346,112" class="dfd-arrow"/>
+                        <text x="366" y="132" class="dfd-flow-text">User Record</text>
+
+                        <!-- Customer → 2.0 Product Catalog (search) -->
+                        <line x1="150" y1="115" x2="242" y2="267" class="dfd-flow-line"/>
+                        <polygon points="242,267 237,259 245,257" class="dfd-arrow"/>
+                        <text x="158" y="210" class="dfd-flow-text">Search / Filter</text>
+
+                        <!-- 2.0 Catalog → D2 Products (query) -->
+                        <line x1="338" y1="290" x2="395" y2="290" class="dfd-flow-line"/>
+                        <polygon points="395,290 387,286 387,294" class="dfd-arrow"/>
+                        <text x="366" y="278" class="dfd-flow-text">Query</text>
+
+                        <!-- D2 Products → 2.0 Catalog (results) -->
+                        <line x1="395" y1="304" x2="338" y2="304" class="dfd-flow-line"/>
+                        <polygon points="338,304 346,308 346,300" class="dfd-arrow"/>
+                        <text x="366" y="320" class="dfd-flow-text">Listings</text>
+
+                        <!-- Vendor → 2.0 Catalog (add/edit product) -->
+                        <line x1="150" y1="476" x2="242" y2="320" class="dfd-flow-line"/>
+                        <polygon points="242,320 236,312 244,310" class="dfd-arrow"/>
+                        <text x="148" y="388" class="dfd-flow-text">Add / Edit Product</text>
+
+                        <!-- Customer → 3.0 Checkout (place order) -->
+                        <line x1="150" y1="120" x2="242" y2="460" class="dfd-flow-line"/>
+                        <polygon points="242,460 237,452 245,450" class="dfd-arrow"/>
+                        <text x="84" y="320" class="dfd-flow-text">Place Order</text>
+
+                        <!-- 3.0 Checkout → D3 Orders (save order) -->
+                        <line x1="338" y1="490" x2="395" y2="490" class="dfd-flow-line"/>
+                        <polygon points="395,490 387,486 387,494" class="dfd-arrow"/>
+                        <text x="366" y="478" class="dfd-flow-text">Save</text>
+
+                        <!-- 3.0 Checkout → 4.0 Order Mgmt (notify) (routed vertically at x=366 to avoid D2 box) -->
+                        <polyline points="338,490 366,490 366,200 552,200" class="dfd-flow-line" fill="none"/>
+                        <polygon points="552,200 544,196 544,204" class="dfd-arrow"/>
+                        <text x="459" y="190" class="dfd-flow-text">Order Created</text>
+
+                        <!-- 4.0 Order Mgmt → D3 Orders (update status) -->
+                        <line x1="600" y1="248" x2="530" y2="470" class="dfd-flow-line"/>
+                        <polygon points="530,470 535,462 527,461" class="dfd-arrow"/>
+                        <text x="595" y="370" class="dfd-flow-text">Update Status</text>
+
+                        <!-- Vendor → 5.0 Approval (route along bottom to avoid Cart circle) -->
+                        <polyline points="150,518 150,570 600,570 600,448" class="dfd-flow-line" fill="none"/>
+                        <polygon points="600,448 596,456 604,456" class="dfd-arrow"/>
+                        <text x="375" y="562" class="dfd-flow-text">Register as Vendor</text>
+
+                        <!-- Admin → 5.0 Approval -->
+                        <line x1="835" y1="310" x2="648" y2="380" class="dfd-flow-line"/>
+                        <polygon points="648,380 657,380 652,372" class="dfd-arrow"/>
+                        <text x="760" y="332" class="dfd-flow-text">Approve / Revoke</text>
+
+                        <!-- 5.0 Approval → D1 Users (toggle is_approved) (routed right of 4.0 circle to avoid cut-through) -->
+                        <polyline points="600,352 670,352 670,100 525,100" class="dfd-flow-line" fill="none"/>
+                        <polygon points="525,100 533,96 533,104" class="dfd-arrow"/>
+                        <text x="680" y="226" class="dfd-flow-text" style="text-anchor: start;">Toggle Approval</text>
+
+                    </svg>
+                    <div class="diagram-caption">Figure 4.3 — DFD Level-1: Internal Processes, Data Stores, and Actor Data Flows</div>
+                </div>
+            </section>
+
+            <!-- 4.5 Database Entity Overview -->
+            <section id="database-entities">
+                <h2>4.5 Database Entity Overview Table</h2>
+                <p>The platform's relational database consists of six core entities that store user details, vendor configurations, catalog items, and checkout history.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 18%;">Entity Name</th>
+                                <th style="width: 22%;">Primary Key</th>
+                                <th style="width: 28%;">Foreign Keys</th>
+                                <th style="width: 32%;">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>User</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td>None</td>
+                                <td>Stores credentials, roles, and profile contacts.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vendor</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td><code>user_id</code> (OneToOne → User)</td>
+                                <td>Defines the vendor shop details and approval status.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Category</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td>None</td>
+                                <td>Represents groups for product classifications (slug-based).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Product</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td><code>vendor_id</code>, <code>category_id</code></td>
+                                <td>Stores items listed by vendors with price and stock.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td><code>customer_id</code> (FK → User)</td>
+                                <td>Header record with order status, delivery address, and total.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>OrderItem</strong></td>
+                                <td><code>id</code> (Auto)</td>
+                                <td><code>order_id</code>, <code>product_id</code></td>
+                                <td>Line-item snapshot of each product purchased at checkout price.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter3.html" class="control-btn">&larr; Chapter 3</a>
+                <a href="chapter5.html" class="control-btn control-btn-next">Chapter 5: Design &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 5 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

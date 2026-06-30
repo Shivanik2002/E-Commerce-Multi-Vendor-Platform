@@ -18,6 +18,8 @@ export default function VendorProducts() {
   const [showForm, setShowForm]     = useState(false);
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
+  const [search, setSearch]         = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const load = () => api.get('/products/').then(r => setProducts(Array.isArray(r.data) ? r.data : r.data.results || []));
 
@@ -81,6 +83,13 @@ export default function VendorProducts() {
     await api.delete(`/products/${id}/`); load();
   };
 
+  const filteredProducts = products.filter(p => {
+    const term = search.toLowerCase();
+    const matchesSearch = (p.name || '').toLowerCase().includes(term);
+    const matchesCategory = categoryFilter === '' || String(p.category) === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="container">
       <div className="flex-between">
@@ -140,6 +149,25 @@ export default function VendorProducts() {
         </div>
       )}
 
+      <div className="flex-gap" style={{ marginBottom: '20px', marginTop: '20px' }}>
+        <input
+          className="input"
+          placeholder="Search products by name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: '200px' }}
+        />
+        <select
+          className="input"
+          value={categoryFilter}
+          onChange={e => setCategoryFilter(e.target.value)}
+          style={{ minWidth: '150px' }}
+        >
+          <option value="">All Categories</option>
+          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+
       <div className="card" style={{padding:0}}>
         <div className="table-wrap">
           <table>
@@ -154,9 +182,9 @@ export default function VendorProducts() {
               </tr>
             </thead>
             <tbody>
-              {products.length === 0
-                ? <tr><td colSpan={5} style={{textAlign:'center', color:'var(--muted)', padding:24}}>No products yet. Click "Add Product" to start.</td></tr>
-                : products.map(p => (
+              {filteredProducts.length === 0
+                ? <tr><td colSpan={6} style={{textAlign:'center', color:'var(--muted)', padding:24}}>No products matched your search/filter.</td></tr>
+                : filteredProducts.map(p => (
                   <tr key={p.id}>
                     <td>
                       {p.images?.length > 0 ? (

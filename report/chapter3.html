@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: Software Requirements Specification (SRS) - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 3: Software Requirements Specification (SRS)</h1>
+            </div>
+
+            <p>
+                The Software Requirements Specification (SRS) document defines what the E-Commerce Multi-Vendor Platform must do (functional requirements) and how well it must do it (non-functional requirements). This chapter serves as the agreement between the developer and the expected system behavior.
+            </p>
+
+            <section id="functional-requirements">
+                <h2>3.1 Functional Requirements</h2>
+                <p>
+                    Functional requirements describe the core features and behaviors the system must support. These are organized by module and associated with specific user roles (Admin, Vendor, Customer, or Public).
+                </p>
+
+                <!-- FR-1: User Management -->
+                <h3>FR-1: User Management</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-1.1</strong></td>
+                                <td>A new user shall be able to register by providing a username, email, password, and role (Customer or Vendor).</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.2</strong></td>
+                                <td>A registered user shall be able to log in using their email and password and receive a JWT access token and refresh token.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.3</strong></td>
+                                <td>The system shall automatically redirect the user to their role-specific dashboard after successful login (Customer &rarr; Products, Vendor &rarr; Vendor Dashboard, Admin &rarr; Admin Dashboard).</td>
+                                <td>All Roles</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.4</strong></td>
+                                <td>The system shall allow a logged-in user to view their own profile details (username, email, role).</td>
+                                <td>All Roles</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.5</strong></td>
+                                <td>The system shall refresh the JWT access token automatically using the refresh token when the access token expires, without requiring the user to log in again.</td>
+                                <td>All Roles</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.6</strong></td>
+                                <td>A logged-in user shall be able to log out, which clears their stored tokens from the browser.</td>
+                                <td>All Roles</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-1.7</strong></td>
+                                <td>The Admin shall be able to view a list of all registered users on the platform.</td>
+                                <td>Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-2: Vendor Management -->
+                <h3>FR-2: Vendor Management</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-2.1</strong></td>
+                                <td>A user registered as a Vendor shall have a Vendor profile created with a shop name and description.</td>
+                                <td>Vendor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-2.2</strong></td>
+                                <td>A newly registered Vendor account shall be in "Pending Approval" status by default and cannot add products until approved.</td>
+                                <td>Vendor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-2.3</strong></td>
+                                <td>The Admin shall be able to view all vendor registrations with their approval status.</td>
+                                <td>Admin</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-2.4</strong></td>
+                                <td>The Admin shall be able to approve a pending vendor, enabling them to list products.</td>
+                                <td>Admin</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-2.5</strong></td>
+                                <td>The Admin shall be able to revoke an approved vendor's access.</td>
+                                <td>Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-3: Product Management -->
+                <h3>FR-3: Product Management</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-3.1</strong></td>
+                                <td>An approved Vendor shall be able to add a new product with name, description, price, stock quantity, and category.</td>
+                                <td>Vendor (Approved)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.2</strong></td>
+                                <td>A Vendor shall be able to edit the details of their own products.</td>
+                                <td>Vendor (Owner)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.3</strong></td>
+                                <td>A Vendor shall be able to delete their own products.</td>
+                                <td>Vendor (Owner)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.4</strong></td>
+                                <td>A Vendor shall not be able to edit or delete products belonging to other vendors.</td>
+                                <td>Vendor (System Rule)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.5</strong></td>
+                                <td>All users (including guests) shall be able to view the full list of active products.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-3.6</strong></td>
+                                <td>The Admin shall be able to create and manage product categories (name and slug).</td>
+                                <td>Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-4: Search and Filter -->
+                <h3>FR-4: Search and Filter</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-4.1</strong></td>
+                                <td>Any user shall be able to search products by keyword in the product name.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-4.2</strong></td>
+                                <td>Any user shall be able to filter products by category using a dropdown selector.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-4.3</strong></td>
+                                <td>Search and filter results shall update dynamically without a full page reload.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-4.4</strong></td>
+                                <td>A user shall be able to clear applied search and filter to return to the full product listing.</td>
+                                <td>Public / Guest</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-5: Cart Management -->
+                <h3>FR-5: Cart Management</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-5.1</strong></td>
+                                <td>A logged-in Customer shall be able to add a product to their shopping cart.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-5.2</strong></td>
+                                <td>A Customer shall be able to increase or decrease the quantity of any item in the cart.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-5.3</strong></td>
+                                <td>A Customer shall be able to remove an individual item from the cart.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-5.4</strong></td>
+                                <td>A Customer shall be able to clear the entire cart in one action.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-5.5</strong></td>
+                                <td>The cart shall display a running total of all items and quantities.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-5.6</strong></td>
+                                <td>The cart item count shall be visible in the navigation bar at all times.</td>
+                                <td>Customer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-6: Order Management -->
+                <h3>FR-6: Order Management</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-6.1</strong></td>
+                                <td>A Customer shall be able to place an order from the checkout page by providing a delivery address.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.2</strong></td>
+                                <td>On successful order placement, the system shall deduct the ordered quantity from the product's stock.</td>
+                                <td>System</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.3</strong></td>
+                                <td>A Customer shall be able to view their complete order history with order ID, date, total, and status.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.4</strong></td>
+                                <td>A Customer shall be able to expand an order to see individual items, quantities, and prices.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.5</strong></td>
+                                <td>A Vendor shall be able to view all orders that contain their products.</td>
+                                <td>Vendor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.6</strong></td>
+                                <td>A Vendor shall be able to update the status of an order from Pending &rarr; Shipped &rarr; Delivered.</td>
+                                <td>Vendor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-6.7</strong></td>
+                                <td>The Admin shall be able to view all orders across all vendors on the platform.</td>
+                                <td>Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FR-7: Dashboard -->
+                <h3>FR-7: Dashboard</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 65%;">Requirement Description</th>
+                                <th style="width: 20%;">Associated Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FR-7.1</strong></td>
+                                <td>The Customer dashboard shall display total orders placed, pending orders, delivered orders, and total amount spent.</td>
+                                <td>Customer</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-7.2</strong></td>
+                                <td>The Vendor dashboard shall display total products listed, total orders received, pending orders, and total revenue from delivered orders.</td>
+                                <td>Vendor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FR-7.3</strong></td>
+                                <td>The Admin dashboard shall display total users, total vendors, total customers, total products, total orders, pending orders, and platform-wide revenue.</td>
+                                <td>Admin</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="non-functional-requirements">
+                <h2>3.2 Non-Functional Requirements</h2>
+                <p>
+                    Non-functional requirements define the quality standards, architectural constraints, and security thresholds the system must satisfy beyond its basic features.
+                </p>
+
+                <!-- NFR-1: Security -->
+                <h3>NFR-1: Security</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-1.1</strong></td>
+                                <td>All API endpoints except registration, login, and product listing shall require a valid JWT access token in the <code>Authorization: Bearer &lt;token&gt;</code> header.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-1.2</strong></td>
+                                <td>Role-based access control (RBAC) shall be enforced on the server side — a Customer cannot access Vendor or Admin endpoints even if they manually construct and send HTTP requests.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-1.3</strong></td>
+                                <td>Vendors shall only be able to modify or delete their own products — object-level permission checks shall be strictly enforced in views and viewsets.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-1.4</strong></td>
+                                <td>Passwords shall be stored as salted cryptographic hashes using Django's default PBKDF2 hashing algorithm — never in plain text.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-1.5</strong></td>
+                                <td>JWT access tokens shall expire after 60 minutes, while refresh tokens shall expire after 7 days to maintain a secure balance between security and user convenience.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-1.6</strong></td>
+                                <td>CORS (Cross-Origin Resource Sharing) shall be configured to only allow requests from the trusted React frontend origin (<code>http://localhost:5173</code>) and block unknown clients.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NFR-2: Performance -->
+                <h3>NFR-2: Performance</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-2.1</strong></td>
+                                <td>API responses for standard product listing and order queries shall complete within 500 milliseconds under normal usage conditions.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-2.2</strong></td>
+                                <td>The React frontend initial page load, including stylesheet download and main JS bundling, shall complete within 3 seconds on a standard broadband connection.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-2.3</strong></td>
+                                <td>Search and filter operations on the products page shall process client-side or return server results within 300 milliseconds to avoid lagging interface feedback.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-2.4</strong></td>
+                                <td>Database queries shall leverage Django ORM's <code>select_related</code> and <code>prefetch_related</code> methods where applicable to avoid N+1 query bottlenecks.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NFR-3: Usability -->
+                <h3>NFR-3: Usability</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-3.1</strong></td>
+                                <td>The interface shall be clean and intuitive — a new user shall be able to register, browse products, and place an order without external documentation or assistance.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-3.2</strong></td>
+                                <td>All forms (registration, login, product listings) shall validate fields dynamically and display clear, descriptive errors (e.g., "Email already registered" instead of "Database Error").</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-3.3</strong></td>
+                                <td>The navigation bar shall dynamically adapt to display only the menu links relevant to the current user's role.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-3.4</strong></td>
+                                <td>The platform layout shall be responsive, adjusting for tablet, desktop, and mobile screen resolutions.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-3.5</strong></td>
+                                <td>Active loading indicators shall be displayed during asynchronous REST API requests so the user is informed of pending operations.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NFR-4: Scalability -->
+                <h3>NFR-4: Scalability</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-4.1</strong></td>
+                                <td>The Django backend API shall remain stateless, avoiding standard server-side sessions, allowing horizontal scaling behind load balancers.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-4.2</strong></td>
+                                <td>The database layer shall remain modular — swapping the development SQLite database for production PostgreSQL must require changing only the <code>DATABASES</code> config dictionary in <code>settings.py</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-4.3</strong></td>
+                                <td>The independent frontend and backend services shall allow decoupled deployment, scaling, and codebase updates.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-4.4</strong></td>
+                                <td>New user roles or vendor permissions can be added to the platform in the future without modification of the base JWT auth architecture.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NFR-5: Reliability -->
+                <h3>NFR-5: Reliability</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-5.1</strong></td>
+                                <td>Order placement operations shall utilize database atomic transactions (<code>transaction.atomic()</code>) to guarantee complete execution of stock deduction and order item creation, preventing database corruption on system interruptions.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-5.2</strong></td>
+                                <td>All backend endpoints shall return precise standard HTTP status codes (200, 201, 400, 401, 403, 404, 500) alongside structured JSON payloads.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-5.3</strong></td>
+                                <td>The frontend Axios client shall intercept API errors and show notification messages rather than crashing or freezing the application state.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- NFR-6: Maintainability -->
+                <h3>NFR-6: Maintainability</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">ID</th>
+                                <th style="width: 85%;">Requirement Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>NFR-6.1</strong></td>
+                                <td>The Django backend shall be split into modular apps (<code>users</code>, <code>vendors</code>, <code>products</code>, <code>orders</code>, <code>dashboard</code>) with isolated models, views, and urls.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-6.2</strong></td>
+                                <td>The React frontend shall follow component-based architecture — separating shared reusable UI components (<code>Navbar</code>, <code>ProductCard</code>) from container pages.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-6.3</strong></td>
+                                <td>All API calls in the frontend shall route through a centralized Axios service configuration (<code>src/services/api.js</code>) to maintain authorization headers in a single location.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NFR-6.4</strong></td>
+                                <td>Source files shall adhere to platform style guide conventions: PEP 8 guidelines for Python/Django and ESLint rules for JavaScript/React.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter2.html" class="control-btn">&larr; Chapter 2</a>
+                <a href="chapter4.html" class="control-btn control-btn-next">Chapter 4: System Analysis &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 4 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

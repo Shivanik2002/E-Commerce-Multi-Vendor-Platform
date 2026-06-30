@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: Future Plans - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 9: Future Plans</h1>
+            </div>
+
+            <p>
+                The initial version of the E-Commerce Multi-Vendor Platform functions as a proof-of-concept. The following sections outline planned upgrades to evolve the application into a production-grade system.
+            </p>
+
+            <section id="payment-gateway">
+                <h2>9.1 Payment Gateway Integration (Razorpay)</h2>
+                <p>
+                    <strong>Current Limitation:</strong> The system simulates transactions using Cash on Delivery (COD) without real money movement.
+                </p>
+                <p>
+                    <strong>Planned Enhancement:</strong> Integrate the Razorpay SDK to handle digital payments (Cards, UPI, Wallets, Netbanking) securely.
+                </p>
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">Django order creation script</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">import</span> razorpay
+<span class="token-keyword">from</span> rest_framework.response <span class="token-keyword">import</span> Response
+
+client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+<span class="token-keyword">def</span> <span class="token-function">create_payment_order</span>(total_amount, order_id):
+    order = client.order.create({
+        <span class="token-string">"amount"</span>: <span class="token-builtin">int</span>(total_amount * 100),  <span class="token-comment"># amount in paise</span>
+        <span class="token-string">"currency"</span>: <span class="token-string">"INR"</span>,
+        <span class="token-string">"receipt"</span>: <span class="token-string">f"order_\${order_id}"</span>,
+    })
+    <span class="token-keyword">return</span> Response({<span class="token-string">"razorpay_order_id"</span>: order[<span class="token-string">"id"</span>]})</code></pre>
+                </div>
+            </section>
+
+            <section id="mobile-app">
+                <h2>9.2 Mobile Application (React Native)</h2>
+                <p>
+                    <strong>Planned Enhancement:</strong> Develop a cross-platform mobile application using React Native. Since the Django REST backend is stateless and communicates via JSON, the existing APIs support mobile clients without modifications.
+                </p>
+                <ul>
+                    <li><strong>Push Notifications:</strong> Notify customers of order status updates using Firebase Cloud Messaging (FCM).</li>
+                    <li><strong>Device Integration:</strong> Allow vendors to capture and upload product images using the device camera.</li>
+                    <li><strong>Biometric Security:</strong> Implement FaceID/Fingerprint logins using native device APIs.</li>
+                </ul>
+            </section>
+
+            <section id="cloud-deployment">
+                <h2>9.3 Production Cloud Deployment (AWS)</h2>
+                <p>
+                    <strong>Planned Stack:</strong> Transition from local deployment to a scalable cloud infrastructure using Amazon Web Services:
+                </p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Service Component</th>
+                                <th style="width: 30%;">AWS Hosting Choice</th>
+                                <th style="width: 45%;">Infrastructure Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Django API Backend</strong></td>
+                                <td>AWS EC2 + Gunicorn + Nginx</td>
+                                <td>Serves stateless API requests.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Relational Database</strong></td>
+                                <td>AWS RDS (PostgreSQL)</td>
+                                <td>Production database with auto-backups.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Static/Media Uploads</strong></td>
+                                <td>AWS S3 + CloudFront CDN</td>
+                                <td>Stores product media assets with low latency.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>React SPA Client</strong></td>
+                                <td>Vercel / Netlify</td>
+                                <td>Serves static React build assets globally.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DNS &amp; SSL</strong></td>
+                                <td>AWS Route 53 + Certificate Mgr</td>
+                                <td>Handles custom domain registration and HTTPS security.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="image-upload">
+                <h2>9.4 Product Image Upload (AWS S3)</h2>
+                <p>
+                    <strong>Current Limitation:</strong> The frontend displays static fallback emojis for product photos.
+                </p>
+                <p>
+                    <strong>Planned Upgrade:</strong> Integrate <code>django-storages</code> and Pillow to process, compress, and upload product images directly to S3.
+                </p>
+                <div class="code-wrapper">
+                    <div class="code-header">
+                        <div class="code-title">backend/products/models.py update</div>
+                        <div class="code-lang">Python</div>
+                    </div>
+                    <pre class="code-body"><code><span class="token-keyword">from</span> django.db <span class="token-keyword">import</span> models
+
+<span class="token-keyword">class</span> <span class="token-function">Product</span>(models.Model):
+    <span class="token-comment"># ... existing fields ...</span>
+    image = models.ImageField(
+        upload_to=<span class="token-string">'products/'</span>,
+        null=<span class="token-keyword">True</span>,
+        blank=<span class="token-keyword">True</span>,
+        help_text=<span class="token-string">"Primary product image"</span>
+    )</code></pre>
+                </div>
+            </section>
+
+            <section id="elasticsearch">
+                <h2>9.5 Typo-Tolerant Search (Elasticsearch)</h2>
+                <p>
+                    <strong>Planned Enhancement:</strong> Replace Django's SQL <code>icontains</code> search with Elasticsearch using <code>django-elasticsearch-dsl</code>.
+                </p>
+                <ul>
+                    <li><strong>Fuzzy Matching:</strong> Searches tolerate common typos (e.g., "iphon" still matches "iPhone").</li>
+                    <li><strong>Relevance Sorting:</strong> Orders search results by search score.</li>
+                    <li><strong>Autocomplete:</strong> Displays suggestions dynamically as the user types.</li>
+                </ul>
+            </section>
+
+            <section id="summary-table">
+                <h2>9.6 Summary of Future Upgrades</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th style="width: 30%;">Upgrade Plan</th>
+                                <th style="width: 40%;">Technology Stack</th>
+                                <th style="width: 20%;">Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>9.1</strong></td>
+                                <td>Razorpay Gateway Integration</td>
+                                <td>Razorpay Python SDK + React Checkout</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(231,76,60,0.15); color:#e74c3c;">HIGH</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.2</strong></td>
+                                <td>React Native Mobile App</td>
+                                <td>React Native + Expo Framework</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(231,76,60,0.15); color:#e74c3c;">HIGH</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.3</strong></td>
+                                <td>AWS Production Cloud</td>
+                                <td>AWS (EC2, RDS, S3, CloudFront)</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(231,76,60,0.15); color:#e74c3c;">HIGH</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.4</strong></td>
+                                <td>S3 Product Image Uploads</td>
+                                <td>AWS S3 + Pillow + Django Storages</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#f1c40f;">MEDIUM</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.5</strong></td>
+                                <td>Typo-Tolerant Search</td>
+                                <td>Elasticsearch + Django Search DSL</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#f1c40f;">MEDIUM</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.6</strong></td>
+                                <td>Customer Reviews &amp; Ratings</td>
+                                <td>Django Review Model + React Stars UI</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#f1c40f;">MEDIUM</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>9.7</strong></td>
+                                <td>Interactive Admin Charts</td>
+                                <td>Recharts (React D3 charting library)</td>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">LOW</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter8.html" class="control-btn">&larr; Chapter 8</a>
+                <div></div>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 10 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

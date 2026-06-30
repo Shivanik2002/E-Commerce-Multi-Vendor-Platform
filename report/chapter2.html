@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Software Project Plan - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 2: Software Project Plan</h1>
+            </div>
+
+            <section id="project-timeline">
+                <h2>2.1 Time Schedule for Various Phases</h2>
+                <p>
+                    The development of the E-Commerce Multi-Vendor Platform was planned across 10 weeks, divided into clearly defined phases. Each phase has specific deliverables that contribute toward the final working system and project report.
+                </p>
+
+                <h3>Weekly Project Schedule</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 12%;">Week</th>
+                                <th style="width: 25%;">Phase</th>
+                                <th style="width: 35%;">Activities</th>
+                                <th style="width: 28%;">Deliverables</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Week 1</strong></td>
+                                <td>Requirement Gathering</td>
+                                <td>Identify user roles (Admin, Vendor, Customer); list functional and non-functional requirements; study similar platforms</td>
+                                <td>Requirements document, list of features per role</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 2</strong></td>
+                                <td>Requirement Gathering</td>
+                                <td>Finalize API endpoint list; identify technology stack (Django + React + JWT); set up GitHub repository</td>
+                                <td>Finalized SRS draft, tech stack decision</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 3</strong></td>
+                                <td>System Analysis</td>
+                                <td>Draw Use Case Diagram for all 3 actors; draw Level-0 and Level-1 DFDs; identify system entities and data flows</td>
+                                <td>Use Case Diagram, DFD diagram drafts</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 4</strong></td>
+                                <td>System Design</td>
+                                <td>Design ER diagram and database schema; plan React component structure and folder layout; define REST API contracts</td>
+                                <td>ER Diagram, DB schema, API endpoint table</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 5</strong></td>
+                                <td>Backend Development - Core</td>
+                                <td>Set up Django project; create custom User model with roles; implement JWT authentication (register, login, refresh, me)</td>
+                                <td>Working auth API with JWT tokens</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 6</strong></td>
+                                <td>Backend Development - Features</td>
+                                <td>Build Vendor, Product, Category, Order, and OrderItem models; implement role-based permissions; implement dashboard stats API</td>
+                                <td>All Django apps with models, serializers, views, URLs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 7</strong></td>
+                                <td>Frontend Development - Core</td>
+                                <td>Set up React + Vite project; build AuthContext, CartContext; create Navbar, ProductCard components; build Home, ProductList, ProductDetail, Login, Register pages</td>
+                                <td>Public-facing React pages connected to backend</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 8</strong></td>
+                                <td>Frontend Development - Dashboards</td>
+                                <td>Build Cart, Checkout, Orders pages; build Vendor Dashboard, Vendor Products (CRUD), Vendor Orders pages; build Admin Dashboard, Admin Vendors, Admin Orders pages</td>
+                                <td>All role-specific dashboards and protected routes working</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 9</strong></td>
+                                <td>Testing &amp; Debugging</td>
+                                <td>Unit testing of Django models; API testing with Postman; integration testing of React ↔ Django; fix CORS issues, JWT refresh bugs, and vendor isolation bugs</td>
+                                <td>Test case table, bug fix log</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Week 10</strong></td>
+                                <td>Implementation &amp; Report</td>
+                                <td>Final deployment setup; write project report (all 9 chapters); prepare presentation slides; record 10-minute video</td>
+                                <td>Completed project report + recorded video</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="phase-summary">
+                <h2>2.2 Phase Summary</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Phase</th>
+                                <th style="width: 15%;">Duration</th>
+                                <th style="width: 60%;">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Requirement Gathering</strong></td>
+                                <td>Week 1–2</td>
+                                <td>Understanding the problem, defining roles, features, and technology stack.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>System Analysis &amp; Design</strong></td>
+                                <td>Week 3–4</td>
+                                <td>Use Case and DFD diagrams, ER diagram, API contract design, component planning.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Backend Development</strong></td>
+                                <td>Week 5–6</td>
+                                <td>Django REST Framework setup — models, serializers, views, JWT authentication, role-based APIs.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontend Development</strong></td>
+                                <td>Week 7–8</td>
+                                <td>React SPA — all pages, contexts, Axios integration, protected routes, role-based navigation.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Testing &amp; Debugging</strong></td>
+                                <td>Week 9</td>
+                                <td>Unit tests, Postman API tests, integration tests, bug fixes.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Implementation &amp; Report</strong></td>
+                                <td>Week 10</td>
+                                <td>Final testing, report writing, presentation preparation, video recording.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tools-used">
+                <h2>2.3 Tools &amp; Technologies Used</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Phase</th>
+                                <th style="width: 70%;">Tools / Technologies</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Planning &amp; Design</strong></td>
+                                <td>Draw.io (diagrams), Google Docs, GitHub</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Backend Development</strong></td>
+                                <td>Python 3, Django, Django REST Framework, SimpleJWT, SQLite, VS Code</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frontend Development</strong></td>
+                                <td>React 18, Vite, Axios, React Router v6, Vanilla CSS, VS Code</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Testing</strong></td>
+                                <td>Postman (API testing), Django TestCase (unit testing), Browser DevTools</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Documentation &amp; Presentation</strong></td>
+                                <td>MS Word / HTML / CSS, PowerPoint, Zoom (video recording)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter1.html" class="control-btn">&larr; Chapter 1</a>
+                <a href="chapter3.html" class="control-btn control-btn-next">Chapter 3: SRS &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 3 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

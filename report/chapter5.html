@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: System Design - E-Commerce Multi-Vendor Platform</title>
+    <link rel="stylesheet" href="report.css">
+    <style>
+        /* Diagram-specific styles for Chapter 5 */
+        .diagram-container {
+            overflow-x: auto;
+            padding: 2rem 1.5rem;
+        }
+        .svg-diagram {
+            display: block;
+            margin: 0 auto;
+            min-width: 600px;
+        }
+
+        /* ERD Table Styles */
+        .erd-table-header { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; fill: #ffffff; text-anchor: middle; letter-spacing: 0.5px; }
+        .erd-table-bg { stroke-width: 1.5; rx: 6; }
+        .erd-field-text { font-family: 'Fira Code', 'Courier New', monospace; font-size: 10px; fill: var(--text-primary); text-anchor: start; }
+        .erd-pk-text { font-family: 'Fira Code', 'Courier New', monospace; font-size: 10px; fill: #d97706; font-weight: 700; text-anchor: start; }
+        [data-theme="dark"] .erd-pk-text { fill: #fbbf24; }
+        .erd-fk-text { font-family: 'Fira Code', 'Courier New', monospace; font-size: 10px; fill: #2563eb; font-weight: 700; text-anchor: start; }
+        [data-theme="dark"] .erd-fk-text { fill: #60a5fa; }
+        .erd-rel-line { stroke: var(--text-muted); stroke-width: 1.8; fill: none; stroke-dasharray: none; }
+        .erd-rel-label { font-family: 'Inter', sans-serif; font-size: 9px; fill: var(--text-muted); text-anchor: middle; font-weight: 600; background: white; }
+        .erd-card-label { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--primary); font-weight: 700; }
+        
+        .erd-rel-p-oi { stroke: #7c3aed; stroke-width: 1.8; fill: none; stroke-dasharray: 5 3; }
+        [data-theme="dark"] .erd-rel-p-oi { stroke: #a78bfa; }
+        .erd-arrow-p-oi { fill: #7c3aed; }
+        [data-theme="dark"] .erd-arrow-p-oi { fill: #a78bfa; }
+
+        .erd-legend-title { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--text-muted); font-weight: 800; }
+        .erd-legend-card { font-family: 'Inter', sans-serif; font-size: 10px; fill: var(--text-secondary); font-weight: 600; }
+
+        /* Architecture Diagram Styles */
+        .arch-t1-box-bg { fill: rgba(29, 78, 216, 0.08); stroke: #1d4ed8; stroke-width: 2; rx: 14; ry: 14; }
+        [data-theme="dark"] .arch-t1-box-bg { stroke: #38bdf8; }
+        .arch-t1-header { fill: #1d4ed8; rx: 14; ry: 14; }
+        [data-theme="dark"] .arch-t1-header { fill: #0284c7; }
+        .arch-t1-text-main { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .arch-t1-text-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-secondary); text-anchor: middle; }
+        .arch-t1-badge-bg { fill: var(--surface); stroke: #93c5fd; stroke-width: 1; rx: 4; ry: 4; }
+        [data-theme="dark"] .arch-t1-badge-bg { stroke: #0284c7; }
+        .arch-t1-badge-text { font-family: 'Fira Code', monospace; font-size: 10px; fill: var(--text-primary); text-anchor: middle; }
+
+        .arch-t2-box-bg { fill: rgba(21, 128, 61, 0.08); stroke: #15803d; stroke-width: 2; rx: 14; ry: 14; }
+        [data-theme="dark"] .arch-t2-box-bg { stroke: #4ade80; }
+        .arch-t2-header { fill: #15803d; rx: 14; ry: 14; }
+        [data-theme="dark"] .arch-t2-header { fill: #16a34a; }
+        .arch-t2-text-main { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .arch-t2-text-sub { font-family: 'Inter', sans-serif; font-size: 11px; fill: var(--text-secondary); text-anchor: middle; }
+        .arch-t2-badge-bg { fill: var(--surface); stroke: #86efac; stroke-width: 1; rx: 4; ry: 4; }
+        [data-theme="dark"] .arch-t2-badge-bg { stroke: #16a34a; }
+        .arch-t2-badge-text { font-family: 'Fira Code', monospace; font-size: 10px; fill: var(--text-primary); text-anchor: middle; }
+
+        .arch-t3-box-bg { fill: rgba(124, 58, 237, 0.08); stroke: #7c3aed; stroke-width: 2; rx: 6; ry: 6; }
+        [data-theme="dark"] .arch-t3-box-bg { stroke: #a78bfa; }
+        .arch-t3-cylinder-top { fill: rgba(124, 58, 237, 0.15); stroke: #7c3aed; stroke-width: 2; }
+        [data-theme="dark"] .arch-t3-cylinder-top { fill: rgba(167, 139, 250, 0.2); stroke: #a78bfa; }
+        .arch-t3-text-main { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; fill: var(--text-primary); text-anchor: middle; }
+        .arch-t3-text-db { font-family: 'Fira Code', monospace; font-size: 10px; fill: var(--text-primary); text-anchor: middle; font-weight: 700; }
+        .arch-t3-text-sub { font-family: 'Inter', sans-serif; font-size: 9px; fill: var(--text-muted); text-anchor: middle; }
+
+        /* Architecture Flow Lines */
+        .arch-flow-text { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600; text-anchor: middle; }
+        .arch-t1-t2 { fill: #1d4ed8; }
+        [data-theme="dark"] .arch-t1-t2 { fill: #38bdf8; }
+        .arch-flow-line-t1-t2 { stroke: #1d4ed8; stroke-width: 2; fill: none; }
+        [data-theme="dark"] .arch-flow-line-t1-t2 { stroke: #38bdf8; }
+        .arch-flow-arrow-t1-t2 { fill: #1d4ed8; }
+        [data-theme="dark"] .arch-flow-arrow-t1-t2 { fill: #38bdf8; }
+
+        .arch-t2-t1 { fill: #15803d; }
+        [data-theme="dark"] .arch-t2-t1 { fill: #4ade80; }
+        .arch-flow-line-t2-t1 { stroke: #15803d; stroke-width: 2; fill: none; }
+        [data-theme="dark"] .arch-flow-line-t2-t1 { stroke: #4ade80; }
+        .arch-flow-arrow-t2-t1 { fill: #15803d; }
+        [data-theme="dark"] .arch-flow-arrow-t2-t1 { fill: #4ade80; }
+
+        .arch-t2-t3 { fill: #7c3aed; }
+        [data-theme="dark"] .arch-t2-t3 { fill: #a78bfa; }
+        .arch-flow-line-t2-t3 { stroke: #7c3aed; stroke-width: 2; fill: none; }
+        [data-theme="dark"] .arch-flow-line-t2-t3 { stroke: #a78bfa; }
+        .arch-flow-arrow-t2-t3 { fill: #7c3aed; }
+        [data-theme="dark"] .arch-flow-arrow-t2-t3 { fill: #a78bfa; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <main class="content-wrapper">
+            <div class="header-banner">
+                <div class="header-university">SASTRA Deemed University</div>
+                <h1 class="header-title">Chapter 5: System Design</h1>
+            </div>
+
+            <p>
+                System Design translates the analytical models from Chapter 4 into technical blueprints. This chapter details the frontend component structure (React routing), the backend database schema (with a complete Entity-Relationship Diagram), the REST API contracts, and a 3-tier system architecture overview.
+            </p>
+
+            <!-- 5.1 Front End Design -->
+            <section id="frontend-design">
+                <h2>5.1 Front End Design</h2>
+                <p>
+                    The frontend application is structured as a component-based Single-Page Application (SPA) using React 18, React Router v6, and Axios. The project folder structure enforces separation of concerns:
+                </p>
+                <ul>
+                    <li><strong><code>/src/components</code></strong>: Reusable presentation components (e.g., <code>Navbar.jsx</code>, <code>ProductCard.jsx</code>).</li>
+                    <li><strong><code>/src/pages</code></strong>: Container pages bound to application routes (e.g., <code>Home.jsx</code>, <code>Cart.jsx</code>, <code>VendorProducts.jsx</code>).</li>
+                    <li><strong><code>/src/context</code></strong>: State providers (<code>AuthContext.jsx</code> for JWT login state, <code>CartContext.jsx</code> for cart updates).</li>
+                    <li><strong><code>/src/services</code></strong>: Utility scripts, primarily <code>api.js</code> which contains the Axios instance with automatic JWT token interceptors.</li>
+                </ul>
+
+                <h3>React Page Routing Structure</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 28%;">URL Path</th>
+                                <th style="width: 32%;">React Component</th>
+                                <th style="width: 20%;">Required Role</th>
+                                <th style="width: 20%;">Access Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>/</code></td>
+                                <td><code>Home.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
+                            </tr>
+                            <tr>
+                                <td><code>/products</code></td>
+                                <td><code>ProductList.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
+                            </tr>
+                            <tr>
+                                <td><code>/products/:id</code></td>
+                                <td><code>ProductDetail.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
+                            </tr>
+                            <tr>
+                                <td><code>/login</code></td>
+                                <td><code>Login.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
+                            </tr>
+                            <tr>
+                                <td><code>/register</code></td>
+                                <td><code>Register.jsx</code></td>
+                                <td>None</td>
+                                <td>Public</td>
+                            </tr>
+                            <tr>
+                                <td><code>/cart</code></td>
+                                <td><code>Cart.jsx</code></td>
+                                <td>Customer</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/checkout</code></td>
+                                <td><code>Checkout.jsx</code></td>
+                                <td>Customer</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/orders</code></td>
+                                <td><code>Orders.jsx</code></td>
+                                <td>Customer</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/vendor</code></td>
+                                <td><code>VendorDashboard.jsx</code></td>
+                                <td>Vendor</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/vendor/products</code></td>
+                                <td><code>VendorProducts.jsx</code></td>
+                                <td>Vendor</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/vendor/orders</code></td>
+                                <td><code>VendorOrders.jsx</code></td>
+                                <td>Vendor</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin</code></td>
+                                <td><code>AdminDashboard.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin/vendors</code></td>
+                                <td><code>AdminVendors.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/admin/orders</code></td>
+                                <td><code>AdminOrders.jsx</code></td>
+                                <td>Admin</td>
+                                <td>Protected (JWT)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5.2 Back End Design / ERD -->
+            <section id="backend-design">
+                <h2>5.2 Back End Design — Entity-Relationship Diagram (ERD)</h2>
+                <p>
+                    The backend database consists of six core relational tables. SQLite is used locally in development and swapped with PostgreSQL in production by changing a single Django <code>settings.py</code> configuration.
+                </p>
+
+                <div class="diagram-container">
+                    <!--
+                        ERD Layout Plan:
+                        ┌──────────┐        ┌──────────────┐       ┌──────────────┐
+                        │  User    │ 1───1  │   Vendor     │ 1──N  │   Product    │
+                        └──────────┘        └──────────────┘       └──────────────┘
+                             │ 1                                           │ N
+                             │                 ┌──────────────┐            │
+                             │ N               │   Category   │ 1──────────┘
+                        ┌────▼─────┐           └──────────────┘
+                        │  Order   │ 1──N  ┌──────────────┐
+                        └──────────┘       │  OrderItem   │
+                                           └──────────────┘
+                    -->
+                    <svg viewBox="0 0 1060 620" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+                        <!-- ===== TABLE: users_user (top-left) ===== -->
+                        <g transform="translate(60, 60)">
+                            <!-- Header bar -->
+                            <rect x="0" y="0" width="190" height="28" rx="6" fill="#005f6b"/>
+                            <text x="95" y="19" class="erd-table-header">users_user</text>
+                            <!-- Body -->
+                            <rect x="0" y="28" width="190" height="140" rx="0" fill="#f0fdfa" stroke="#005f6b" stroke-width="1.5"/>
+                            <rect x="0" y="154" width="190" height="14" rx="0" fill="none" stroke="#005f6b" stroke-width="1.5"/>
+                            <!-- Fields -->
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="190" y2="57" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-field-text">email (EmailField, unique)</text>
+                            <line x1="0" y1="81" x2="190" y2="81" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-field-text">username (CharField)</text>
+                            <line x1="0" y1="105" x2="190" y2="105" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">role (varchar: 3 choices)</text>
+                            <line x1="0" y1="129" x2="190" y2="129" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">password (hash)</text>
+                        </g>
+
+                        <!-- ===== TABLE: vendors_vendor (top-center) ===== -->
+                        <g transform="translate(340, 60)">
+                            <rect x="0" y="0" width="200" height="28" rx="6" fill="#1d4ed8"/>
+                            <text x="100" y="19" class="erd-table-header">vendors_vendor</text>
+                            <rect x="0" y="28" width="200" height="140" rx="0" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="200" y2="57" stroke="#dbeafe" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-fk-text">🔗 user_id (→ User, 1:1)</text>
+                            <line x1="0" y1="81" x2="200" y2="81" stroke="#dbeafe" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-field-text">shop_name (varchar)</text>
+                            <line x1="0" y1="105" x2="200" y2="105" stroke="#dbeafe" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">description (TextField)</text>
+                            <line x1="0" y1="129" x2="200" y2="129" stroke="#dbeafe" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">is_approved (Boolean)</text>
+                        </g>
+
+                        <!-- ===== TABLE: products_product (top-right) ===== -->
+                        <g transform="translate(640, 60)">
+                            <rect x="0" y="0" width="210" height="28" rx="6" fill="#7c3aed"/>
+                            <text x="105" y="19" class="erd-table-header">products_product</text>
+                            <rect x="0" y="28" width="210" height="175" rx="0" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="210" y2="57" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-fk-text">🔗 vendor_id (→ Vendor)</text>
+                            <line x1="0" y1="81" x2="210" y2="81" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-fk-text">🔗 category_id (→ Category)</text>
+                            <line x1="0" y1="105" x2="210" y2="105" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">name (CharField)</text>
+                            <line x1="0" y1="129" x2="210" y2="129" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">price (DecimalField)</text>
+                            <line x1="0" y1="153" x2="210" y2="153" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="170" class="erd-field-text">stock (PositiveIntegerField)</text>
+                            <line x1="0" y1="177" x2="210" y2="177" stroke="#ede9fe" stroke-width="1"/>
+                            <text x="10" y="196" class="erd-field-text">is_active (BooleanField)</text>
+                        </g>
+
+                        <!-- ===== TABLE: products_category (center-right) ===== -->
+                        <g transform="translate(640, 330)">
+                            <rect x="0" y="0" width="210" height="28" rx="6" fill="#0f766e"/>
+                            <text x="105" y="19" class="erd-table-header">products_category</text>
+                            <rect x="0" y="28" width="210" height="110" rx="0" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="210" y2="57" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-field-text">name (CharField)</text>
+                            <line x1="0" y1="81" x2="210" y2="81" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-field-text">slug (SlugField, unique)</text>
+                            <line x1="0" y1="105" x2="210" y2="105" stroke="#ccfbf1" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">created_at (DateTimeField)</text>
+                        </g>
+
+                        <!-- ===== TABLE: orders_order (bottom-left) ===== -->
+                        <g transform="translate(60, 380)">
+                            <rect x="0" y="0" width="200" height="28" rx="6" fill="#b45309"/>
+                            <text x="100" y="19" class="erd-table-header">orders_order</text>
+                            <rect x="0" y="28" width="200" height="155" rx="0" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="200" y2="57" stroke="#fef9c3" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-fk-text">🔗 customer_id (→ User)</text>
+                            <line x1="0" y1="81" x2="200" y2="81" stroke="#fef9c3" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-field-text">total_amount (Decimal)</text>
+                            <line x1="0" y1="105" x2="200" y2="105" stroke="#fef9c3" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">status (varchar, choices)</text>
+                            <line x1="0" y1="129" x2="200" y2="129" stroke="#fef9c3" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">address (TextField)</text>
+                            <line x1="0" y1="153" x2="200" y2="153" stroke="#fef9c3" stroke-width="1"/>
+                            <text x="10" y="170" class="erd-field-text">created_at (DateTimeField)</text>
+                        </g>
+
+                        <!-- ===== TABLE: orders_orderitem (bottom-center) ===== -->
+                        <g transform="translate(340, 380)">
+                            <rect x="0" y="0" width="200" height="28" rx="6" fill="#dc2626"/>
+                            <text x="100" y="19" class="erd-table-header">orders_orderitem</text>
+                            <rect x="0" y="28" width="200" height="130" rx="0" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+                            <text x="10" y="50" class="erd-pk-text">🔑 id (AutoField)</text>
+                            <line x1="0" y1="57" x2="200" y2="57" stroke="#fee2e2" stroke-width="1"/>
+                            <text x="10" y="74" class="erd-fk-text">🔗 order_id (→ Order)</text>
+                            <line x1="0" y1="81" x2="200" y2="81" stroke="#fee2e2" stroke-width="1"/>
+                            <text x="10" y="98" class="erd-fk-text">🔗 product_id (→ Product)</text>
+                            <line x1="0" y1="105" x2="200" y2="105" stroke="#fee2e2" stroke-width="1"/>
+                            <text x="10" y="122" class="erd-field-text">quantity (PositiveInteger)</text>
+                            <line x1="0" y1="129" x2="200" y2="129" stroke="#fee2e2" stroke-width="1"/>
+                            <text x="10" y="146" class="erd-field-text">price (Decimal, snapshot)</text>
+                        </g>
+
+                        <!-- ===== RELATIONSHIP LINES ===== -->
+
+                        <!-- User (1) ——— Vendor (1)  [OneToOne] -->
+                        <line x1="250" y1="140" x2="340" y2="140" class="erd-rel-line"/>
+                        <text x="248" y="136" class="erd-card-label">1</text>
+                        <text x="336" y="136" class="erd-card-label">1</text>
+
+                        <!-- Vendor (1) ——— Product (N) -->
+                        <line x1="540" y1="140" x2="640" y2="140" class="erd-rel-line"/>
+                        <text x="538" y="136" class="erd-card-label">1</text>
+                        <text x="636" y="136" class="erd-card-label">N</text>
+
+                        <!-- Category (1) ——— Product (N) [vertical from category up to product, routed at x=700 to separate from orderitem line] -->
+                        <line x1="700" y1="330" x2="700" y2="263" class="erd-rel-line"/>
+                        <text x="708" y="325" class="erd-card-label">1</text>
+                        <text x="708" y="272" class="erd-card-label">N</text>
+
+                        <!-- User (1) ——— Order (N) [vertical left column] -->
+                        <line x1="155" y1="200" x2="155" y2="380" class="erd-rel-line"/>
+                        <text x="162" y="205" class="erd-card-label">1</text>
+                        <text x="162" y="378" class="erd-card-label">N</text>
+
+                        <!-- Order (1) ——— OrderItem (N) -->
+                        <line x1="260" y1="457" x2="340" y2="457" class="erd-rel-line"/>
+                        <text x="258" y="453" class="erd-card-label">1</text>
+                        <text x="337" y="453" class="erd-card-label">N</text>
+
+                        <!-- Product (1) ——— OrderItem (N): route to the right of Product table, then down to OrderItem (starts at x=800 to separate from category line) -->
+                        <polyline points="800,263 800,305 880,305 880,460 540,460" class="erd-rel-p-oi"/>
+                        <polygon points="540,460 548,456 548,464" class="erd-arrow-p-oi"/>
+                        <text x="806" y="285" class="erd-card-label erd-label-p-oi">1</text>
+                        <text x="544" y="452" class="erd-card-label erd-label-p-oi">N</text>
+
+                        <!-- Legend -->
+                        <g transform="translate(60, 580)">
+                            <rect x="0" y="-14" width="550" height="26" rx="4" fill="var(--background)" stroke="var(--border)" stroke-width="1"/>
+                            <text x="10" y="3" class="erd-legend-title">LEGEND:</text>
+                            <text x="75" y="3" class="erd-pk-text">🔑 Primary Key</text>
+                            <text x="200" y="3" class="erd-fk-text">🔗 Foreign Key</text>
+                            <text x="325" y="3" class="erd-legend-card">1, N Cardinality</text>
+                        </g>
+
+                    </svg>
+                    <div class="diagram-caption">Figure 5.1 — Entity-Relationship Diagram (ERD) showing all 6 database tables, their fields, and relationships</div>
+                </div>
+            </section>
+
+            <!-- 5.3 Interface Design / API Contracts -->
+            <section id="interface-design">
+                <h2>5.3 Interface Design (REST API Contracts)</h2>
+                <p>
+                    API endpoints serve as the communication interface between the React frontend client and the Django backend. Authentication is handled statelessly via JWT tokens sent in the <code>Authorization: Bearer &lt;token&gt;</code> header.
+                </p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Method</th>
+                                <th style="width: 30%;">API Endpoint</th>
+                                <th style="width: 15%;">Auth Required</th>
+                                <th style="width: 25%;">Request Payload</th>
+                                <th style="width: 20%;">Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
+                                <td><code>/api/auth/register/</code></td>
+                                <td>No (Public)</td>
+                                <td><code>{email, username, password, role}</code></td>
+                                <td>201 — User details</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
+                                <td><code>/api/auth/login/</code></td>
+                                <td>No (Public)</td>
+                                <td><code>{email, password}</code></td>
+                                <td>200 — JWT token pair</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
+                                <td><code>/api/auth/me/</code></td>
+                                <td>Yes (Any role)</td>
+                                <td>None</td>
+                                <td>200 — Profile details</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
+                                <td><code>/api/products/</code></td>
+                                <td>No (Public)</td>
+                                <td>Optional query params</td>
+                                <td>200 — Product list</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
+                                <td><code>/api/products/</code></td>
+                                <td>Yes (Vendor)</td>
+                                <td><code>{name, price, stock, category_id}</code></td>
+                                <td>201 — Created product</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PUT</span></td>
+                                <td><code>/api/products/{id}/</code></td>
+                                <td>Yes (Vendor Owner)</td>
+                                <td><code>{name, price, stock}</code></td>
+                                <td>200 — Updated product</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(231,76,60,0.15); color:#e74c3c;">DELETE</span></td>
+                                <td><code>/api/products/{id}/</code></td>
+                                <td>Yes (Vendor Owner)</td>
+                                <td>None</td>
+                                <td>204 — No Content</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(46,204,113,0.15); color:#2ecc71;">POST</span></td>
+                                <td><code>/api/orders/</code></td>
+                                <td>Yes (Customer)</td>
+                                <td><code>{items: [{product, qty}], address}</code></td>
+                                <td>201 — Order receipt</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
+                                <td><code>/api/orders/</code></td>
+                                <td>Yes (Role-based)</td>
+                                <td>None</td>
+                                <td>200 — Filtered orders</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(241,196,15,0.15); color:#d97706;">PATCH</span></td>
+                                <td><code>/api/orders/{id}/</code></td>
+                                <td>Yes (Vendor)</td>
+                                <td><code>{status: "shipped"}</code></td>
+                                <td>200 — Updated status</td>
+                            </tr>
+                            <tr>
+                                <td><span class="nav-item-num" style="background-color:rgba(52,152,219,0.15); color:#3498db;">GET</span></td>
+                                <td><code>/api/dashboard/stats/</code></td>
+                                <td>Yes (Role-based)</td>
+                                <td>None</td>
+                                <td>200 — Stats &amp; revenue</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5.4 System Architecture -->
+            <section id="system-architecture">
+                <h2>5.4 System Architecture Diagram</h2>
+                <p>
+                    The platform uses a decoupled 3-tier architecture. The React SPA (client), Django REST API (application server), and SQLite/PostgreSQL (database) are fully independent, allowing each tier to be scaled separately.
+                </p>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 960 300" class="svg-diagram" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+                        <!-- Tier 1: Client Layer -->
+                        <g transform="translate(60, 50)">
+                            <rect x="0" y="0" width="220" height="200" class="arch-t1-box-bg"/>
+                            <rect x="0" y="0" width="220" height="34" class="arch-t1-header"/>
+                            <rect x="0" y="20" width="220" height="14" class="arch-t1-header"/>
+                            <text x="110" y="22" class="arch-label-title" fill="white">TIER 1: CLIENT</text>
+                            <text x="110" y="75" class="arch-t1-text-main">React 18 SPA</text>
+                            <text x="110" y="100" class="arch-t1-text-sub">(Vite Build Tool)</text>
+                            <!-- Tech tags -->
+                            <rect x="15" y="118" width="92" height="22" class="arch-t1-badge-bg"/>
+                            <text x="61" y="133" class="arch-t1-badge-text">React Router v6</text>
+                            <rect x="117" y="118" width="88" height="22" class="arch-t1-badge-bg"/>
+                            <text x="161" y="133" class="arch-t1-badge-text">Context API</text>
+                            <rect x="15" y="148" width="92" height="22" class="arch-t1-badge-bg"/>
+                            <text x="61" y="163" class="arch-t1-badge-text">Axios Client</text>
+                            <rect x="117" y="148" width="88" height="22" class="arch-t1-badge-bg"/>
+                            <text x="161" y="163" class="arch-t1-badge-text">JWT Storage</text>
+                        </g>
+
+                        <!-- Arrow between Tier 1 and Tier 2 -->
+                        <g transform="translate(320, 150)">
+                            <!-- Forward arrow (request) -->
+                            <line x1="0" y1="-22" x2="100" y2="-22" class="arch-flow-line-t1-t2"/>
+                            <polygon points="100,-22 92,-26 92,-18" class="arch-flow-arrow-t1-t2"/>
+                            <text x="50" y="-28" class="arch-flow-text arch-t1-t2">HTTPS Request</text>
+                            <!-- Backward arrow (response) -->
+                            <line x1="100" y1="22" x2="0" y2="22" class="arch-flow-line-t2-t1"/>
+                            <polygon points="0,22 8,26 8,18" class="arch-flow-arrow-t2-t1"/>
+                            <text x="50" y="36" class="arch-flow-text arch-t2-t1">JSON Response</text>
+                        </g>
+
+                        <!-- Tier 2: Application Layer -->
+                        <g transform="translate(460, 50)">
+                            <rect x="0" y="0" width="220" height="200" class="arch-t2-box-bg"/>
+                            <rect x="0" y="0" width="220" height="34" class="arch-t2-header"/>
+                            <rect x="0" y="20" width="220" height="14" class="arch-t2-header"/>
+                            <text x="110" y="22" class="arch-label-title" fill="white">TIER 2: APPLICATION</text>
+                            <text x="110" y="75" class="arch-t2-text-main">Django REST</text>
+                            <text x="110" y="100" class="arch-t2-text-sub">Framework (DRF)</text>
+                            <!-- Tech tags -->
+                            <rect x="15" y="118" width="92" height="22" class="arch-t2-badge-bg"/>
+                            <text x="61" y="133" class="arch-t2-badge-text">SimpleJWT</text>
+                            <rect x="117" y="118" width="88" height="22" class="arch-t2-badge-bg"/>
+                            <text x="161" y="133" class="arch-t2-badge-text">ViewSets</text>
+                            <rect x="15" y="148" width="92" height="22" class="arch-t2-badge-bg"/>
+                            <text x="61" y="163" class="arch-t2-badge-text">Serializers</text>
+                            <rect x="117" y="148" width="88" height="22" class="arch-t2-badge-bg"/>
+                            <text x="161" y="163" class="arch-t2-badge-text">CORS Config</text>
+                        </g>
+
+                        <!-- Arrow between Tier 2 and Tier 3 -->
+                        <g transform="translate(720, 150)">
+                            <line x1="0" y1="-22" x2="100" y2="-22" class="arch-flow-line-t2-t3"/>
+                            <polygon points="100,-22 92,-26 92,-18" class="arch-flow-arrow-t2-t3"/>
+                            <text x="50" y="-28" class="arch-flow-text arch-t2-t3">Django ORM</text>
+                            <line x1="100" y1="22" x2="0" y2="22" class="arch-flow-line-t2-t3"/>
+                            <polygon points="0,22 8,26 8,18" class="arch-flow-arrow-t2-t3"/>
+                            <text x="50" y="36" class="arch-flow-text arch-t2-t3">QuerySet Results</text>
+                        </g>
+
+                        <!-- Tier 3: Database Layer -->
+                        <g transform="translate(860, 50)">
+                            <rect x="0" y="20" width="72" height="170" class="arch-t3-box-bg"/>
+                            <ellipse cx="36" cy="20" rx="36" ry="14" class="arch-t3-cylinder-top"/>
+                            <ellipse cx="36" cy="190" rx="36" ry="14" class="arch-t3-cylinder-top"/>
+                            <text x="36" y="88" class="arch-t3-text-main">TIER 3</text>
+                            <text x="36" y="108" class="arch-t3-text-main">DATABASE</text>
+                            <text x="36" y="136" class="arch-t3-text-db">SQLite</text>
+                            <text x="36" y="152" class="arch-t3-text-sub">(development)</text>
+                            <text x="36" y="172" class="arch-t3-text-db">PostgreSQL</text>
+                        </g>
+
+                        <!-- Caption strip at bottom -->
+                        <rect x="60" y="267" width="872" height="22" rx="4" fill="var(--background)" stroke="var(--border)" stroke-width="1"/>
+                        <text x="496" y="282" style="font-family:'Inter'; font-size:10px; fill:var(--text-secondary); text-anchor:middle; font-weight:600;">
+                            Stateless Architecture: Frontend and Backend can be scaled, deployed, and updated independently.
+                        </text>
+                    </svg>
+                    <div class="diagram-caption">Figure 5.2 — 3-Tier Decoupled System Architecture: React Client → Django REST API → SQLite/PostgreSQL</div>
+                </div>
+            </section>
+
+            <div class="page-controls">
+                <a href="chapter4.html" class="control-btn">&larr; Chapter 4</a>
+                <a href="chapter6.html" class="control-btn control-btn-next">Chapter 6: Source Code &rarr;</a>
+            </div>
+            
+            <footer class="report-footer">
+                <span>E-Commerce Multi-Vendor Platform Report</span>
+                <span>Page 6 of 11</span>
+            </footer>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

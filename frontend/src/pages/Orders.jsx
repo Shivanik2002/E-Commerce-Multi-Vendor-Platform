@@ -8,6 +8,8 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const { state } = useLocation();
 
   useEffect(() => {
@@ -15,14 +17,47 @@ export default function Orders() {
       .finally(() => setLoading(false));
   }, []);
 
+  const filteredOrders = orders.filter(o => {
+    const term = search.toLowerCase();
+    const matchesSearch = 
+      String(o.id).includes(term) ||
+      (o.address || '').toLowerCase().includes(term) ||
+      (o.items || []).some(item => (item.product_name || '').toLowerCase().includes(term));
+    const matchesStatus = statusFilter === '' || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   if (loading) return <div className="loading container">Loading orders...</div>;
 
   return (
     <div className="container">
       <h1 className="page-title">My Orders</h1>
       {state?.success && <div className="alert alert-success">✅ Order placed successfully!</div>}
-      {orders.length === 0
-        ? <div className="empty"><h3>No orders yet</h3><p>Place your first order from the products page.</p></div>
+
+      <div className="flex-gap" style={{ marginBottom: '20px' }}>
+        <input
+          className="input"
+          placeholder="Search orders by ID, address, or product name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: '200px' }}
+        />
+        <select
+          className="input"
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          style={{ minWidth: '150px' }}
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {filteredOrders.length === 0
+        ? <div className="empty"><h3>No orders matched your search</h3><p>Place your first order from the products page or modify your search filters.</p></div>
         : (
           <div className="card" style={{padding:0}}>
             <div className="table-wrap">
@@ -39,7 +74,7 @@ export default function Orders() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map(o => (
+                  {filteredOrders.map(o => (
                     <>
                       <tr key={o.id}>
                         <td>
@@ -77,7 +112,7 @@ export default function Orders() {
                       </tr>
                       {expanded === o.id && (
                         <tr key={`${o.id}-detail`}>
-                          <td colSpan={6} style={{background:'var(--bg)', padding:16}}>
+                          <td colSpan={7} style={{background:'var(--bg)', padding:16}}>
                             <div
                               style={{
                                 marginBottom: 12,

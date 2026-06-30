@@ -96,13 +96,7 @@ temp/
 *.gz
 *.rar
 
-# =========================
 # Reports / Generated Files
 # =========================
 report/generated/
 ppt/generated/
-
-# =========================
-# Documents
-# =========================
-docs/
