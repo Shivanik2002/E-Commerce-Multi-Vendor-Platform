@@ -65,7 +65,7 @@ export default function Navbar() {
           Stores
         </Link>
 
-        <a href="/report/index.html" target="_blank" rel="noopener noreferrer">
+        <a href="/report/index.html">
           Report
         </a>
 
