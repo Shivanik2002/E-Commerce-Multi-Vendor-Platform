@@ -11,9 +11,6 @@ env/
 ENV/
 .venv/
 
-# Django
-db.sqlite3
-*.sqlite3
 
 # Media Files
 backend/media/
@@ -100,3 +97,5 @@ temp/
 # =========================
 report/generated/
 ppt/generated/
+# Local Netlify folder
+.netlify
