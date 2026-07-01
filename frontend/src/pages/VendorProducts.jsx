@@ -102,7 +102,7 @@ export default function VendorProducts() {
           <h3 style={{marginBottom:16}}>{editing ? 'Edit Product' : 'Add New Product'}</h3>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={submit}>
-            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
+            <div className="grid-2-col">
               <div className="form-group">
                 <label>Product Name</label>
                 <input className="input" required value={form.name} onChange={e => setForm({...form, name:e.target.value})} />

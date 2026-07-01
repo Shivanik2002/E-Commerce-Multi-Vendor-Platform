@@ -9,6 +9,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const dropdownRef = useRef();
 
@@ -31,9 +32,10 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Close dropdown on route change
+  // Close dropdown and mobile menu on route change
   useEffect(() => {
     setDropdownOpen(false);
+    setMobileMenuOpen(false);
   }, [pathname]);
 
   // Sync theme with body class
@@ -52,23 +54,22 @@ export default function Navbar() {
         🛒 MultiVendor
       </Link>
 
-      <div className="nav-group">
+      <div className="nav-links">
         <Link to="/" className={cls('/')}>
           Home
         </Link>
-
         <Link to="/products" className={cls('/products')}>
           Products
         </Link>
-
         <Link to="/vendors" className={cls('/vendors')}>
           Stores
         </Link>
-
         <a href="/report/index.html">
           Report
         </a>
+      </div>
 
+      <div className="nav-actions">
         {(!user || user.role === 'customer') && (
           <Link to="/cart" className={cls('/cart')} title="Cart">
             🛒 {count > 0 && `(${count})`}
@@ -78,6 +79,7 @@ export default function Navbar() {
         {/* Theme Toggle Button */}
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="desktop-only"
           style={{
             background: 'none',
             border: 'none',
@@ -98,12 +100,12 @@ export default function Navbar() {
         </button>
 
         {user ? (
-          <div className="dropdown" ref={dropdownRef}>
+          <div className="dropdown desktop-only" ref={dropdownRef}>
             <button
               className="dropdown-toggle"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              👤 {user.username} <span style={{ fontSize: '10px' }}>▼</span>
+              👤 <span className="dropdown-username">{user.username}</span> <span style={{ fontSize: '10px' }}>▼</span>
             </button>
 
             {dropdownOpen && (
@@ -171,11 +173,128 @@ export default function Navbar() {
             )}
           </div>
         ) : (
-          <Link to="/login" className={cls('/login')}>
+          <Link to="/login" className={`${cls('/login')} desktop-only`}>
             Login
           </Link>
         )}
+
+        <button
+          className="menu-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="mobile-nav-menu">
+          <Link to="/" className={cls('/')}>
+            Home
+          </Link>
+          <Link to="/products" className={cls('/products')}>
+            Products
+          </Link>
+          <Link to="/vendors" className={cls('/vendors')}>
+            Stores
+          </Link>
+          <a href="/report/index.html">
+            Report
+          </a>
+
+          <div className="dropdown-divider"></div>
+
+          {/* Theme Toggle option inside mobile menu */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text)',
+              fontSize: '14px',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              width: '100%',
+              textAlign: 'left'
+            }}
+          >
+            {theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+          </button>
+
+          <div className="dropdown-divider"></div>
+
+          {user ? (
+            <>
+              <div style={{ padding: '6px 16px', fontSize: '11px', fontWeight: '700', color: 'var(--muted)', letterSpacing: '1px' }}>
+                👤 {user.username.toUpperCase()} ({user.role.toUpperCase()})
+              </div>
+              <Link to="/profile" className="dropdown-item">
+                ⚙️ My Profile
+              </Link>
+
+              {user.role === 'customer' && (
+                <Link to="/orders" className="dropdown-item">
+                  📦 My Orders
+                </Link>
+              )}
+
+              {user.role === 'vendor' && (
+                <>
+                  <Link to="/vendor" className="dropdown-item">
+                    📊 Dashboard
+                  </Link>
+                  <Link to="/vendor/products" className="dropdown-item">
+                    🏷️ My Products
+                  </Link>
+                  <Link to="/vendor/orders" className="dropdown-item">
+                    📋 Received Orders
+                  </Link>
+                </>
+              )}
+
+              {user.role === 'admin' && (
+                <>
+                  <Link to="/admin" className="dropdown-item">
+                    📊 Dashboard
+                  </Link>
+                  <Link to="/admin/vendors" className="dropdown-item">
+                    🤝 Manage Vendors
+                  </Link>
+                  <Link to="/admin/products" className="dropdown-item">
+                    🏷️ Manage Products
+                  </Link>
+                  <Link to="/admin/orders" className="dropdown-item">
+                    📋 Manage Orders
+                  </Link>
+                  <Link to="/admin/users" className="dropdown-item">
+                    👥 Manage Users
+                  </Link>
+                  <Link to="/admin/customers" className="dropdown-item">
+                    👤 Manage Customers
+                  </Link>
+                </>
+              )}
+
+              <div className="dropdown-divider"></div>
+              
+              <button
+                className="dropdown-item logout"
+                onClick={handleLogout}
+                style={{ width: '100%', border: 'none', background: 'none', font: 'inherit' }}
+              >
+                🚪 Logout
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className={cls('/login')}>
+              🔑 Login
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

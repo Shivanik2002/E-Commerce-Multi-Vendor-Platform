@@ -33,7 +33,7 @@ export default function Checkout() {
   return (
     <div className="container">
       <h1 className="page-title">Checkout</h1>
-      <div style={{display:'grid', gridTemplateColumns:'1fr 320px', gap:24}}>
+      <div className="sidebar-layout">
         <form onSubmit={submit} className="card">
           <h3 style={{marginBottom:16}}>Delivery Information</h3>
           {error && <div className="alert alert-error">{error}</div>}

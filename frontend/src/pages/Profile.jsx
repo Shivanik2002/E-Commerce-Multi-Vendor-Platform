@@ -82,7 +82,7 @@ export default function Profile() {
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+        <div className="grid-2-col" style={{ marginBottom: '16px' }}>
           <div className="form-group">
             <label>Username</label>
             <input
@@ -106,7 +106,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+        <div className="grid-2-col" style={{ marginBottom: '16px' }}>
           <div className="form-group">
             <label>Email Address</label>
             <input

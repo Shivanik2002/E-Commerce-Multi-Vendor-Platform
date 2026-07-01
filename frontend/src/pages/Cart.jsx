@@ -31,7 +31,7 @@ export default function Cart() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px', marginTop: '24px' }}>
+      <div className="sidebar-layout">
         {/* Items List */}
         <div className="card" style={{ padding: '24px' }}>
           {cart.map(item => (
