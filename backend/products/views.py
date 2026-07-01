@@ -18,7 +18,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsVendorOrReadOnly]
 
     def get_queryset(self):
-        qs       = Product.objects.filter(is_active=True).order_by('-created_at')
+        user = self.request.user
+        if user.is_authenticated and user.role == 'vendor':
+            qs = Product.objects.filter(vendor__user=user)
+        else:
+            qs = Product.objects.filter(is_active=True)
+        
+        qs = qs.order_by('-created_at')
         search   = self.request.query_params.get('search')
         category = self.request.query_params.get('category')
         vendor   = self.request.query_params.get('vendor')
