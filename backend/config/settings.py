@@ -6,12 +6,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-multivendor-dev-secret-key-change-in-production'
 DEBUG = True
 ALLOWED_HOSTS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:5173',
-    'http://localhost:8000',
-    'http://localhost:5173',
-    'https://ecommerce-multivendor.netlify.app',
-    'https://multi-vendor-api-6lsu.onrender.com']
+    '127.0.0.1',
+    'localhost',
+    'multi-vendor-api-6lsu.onrender.com',
+    'ecommerce-multivendor.netlify.app',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -85,6 +84,8 @@ AUTH_USER_MODEL = 'users.User'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:3000',
+    'https://ecommerce-multivendor.netlify.app',
+    'https://multi-vendor-api-6lsu.onrender.com',
 ]
 
 REST_FRAMEWORK = {
